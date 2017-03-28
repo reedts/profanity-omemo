@@ -30,10 +30,10 @@ struct omemo_device {
 /**
  * @brief Allocates memory for a new OMEMO device.
  *
- * @param jid: JID the device belongs to.
- * @param id: ID the device will use.
+ * @param jid JID the device belongs to.
+ * @param id ID the device will use.
  *
- * @return 'NULL' if an error occured, a pointer to the created OMEMO device
+ * @return `NULL` if an error occured, a pointer to the created OMEMO device
  *	   otherwise.
  */
 struct omemo_device *omemo_device_create(const char *jid, uint32_t id);
@@ -41,7 +41,7 @@ struct omemo_device *omemo_device_create(const char *jid, uint32_t id);
 /**
  * @brief Deallocates memory for an OMEMO device.
  *
- * @param device: Pointer to OMEMO device to be deleted.
+ * @param device Pointer to OMEMO device to be deleted.
  */
 void omemo_device_free(struct omemo_device *device);
 
