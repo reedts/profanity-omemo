@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum _device_trust {
 	UNDECIDED = 0,
 	UNTRUSTED,
@@ -45,5 +49,8 @@ struct omemo_device *omemo_device_create(const char *jid, uint32_t id);
  */
 void omemo_device_free(struct omemo_device *device);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PROF_OMEMO_DEVICE_H */
