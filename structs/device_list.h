@@ -14,19 +14,9 @@ struct device_list {
 	struct omemo_device *device;
 };
 
-/**
- * @brief Creates a new empty device list.
- *
- * @param head Head of the list to be created
- *
- * @retval 0 The list was initialised successfully
- * @retval -1 An error occurred while initialising the list and
- *         `errno` was set to indicate the cause
- */
-int omemo_device_list_create(struct device_list **head);
 
 /**
- * @brief Adds an OMEMO device to the end of the device list.
+ * @brief Adds an OMEMO device to the begin of the device list.
  *
  * The list will free the `omeme_device` when it is not needed anymore.
  * Avoid freeing it manually or remove it from the list first.

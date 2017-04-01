@@ -3,28 +3,11 @@
 #include "device_list.h"
 #include "omemo_device.h"
 
-int omemo_device_list_create(struct device_list **head)
-{
-	struct device_list *new_head;
-
-	new_head = malloc(sizeof(struct device_list));
-
-	if (!new_head) {
-		return -1;
-	}
-
-	new_head->next = NULL;
-	new_head->device = NULL;
-
-	*head = new_head;
-
-	return 0;
-}
 
 int omemo_device_list_add(struct device_list **head,
 			  struct omemo_device *device)
 {
-	struct device_list *new_device, *cur;
+	struct device_list *new_device;
 
 	if (!head || !device) {
 		errno = EINVAL;
@@ -40,15 +23,14 @@ int omemo_device_list_add(struct device_list **head,
 	new_device = malloc(sizeof(struct device_list));
 
 	if (!new_device) {
+		errno = ENOMEM;
 		return -1;
 	}
 
-	new_device->next = NULL;
+	new_device->next = *head;
 	new_device->device = device;
 
-	for (cur = *head; cur != NULL; cur = cur->next) { }
-
-	cur->next = new_device;
+	*head = new_device;
 
 	return 1;
 }
@@ -77,17 +59,23 @@ int omemo_device_list_add_inplace(struct device_list **head,
 	new_device = malloc(sizeof(struct device_list));
 
 	if (!new_device) {
+		errno = ENOMEM;
 		return -1;
 	}
 
 	new_device->next = pos;
 	new_device->device = device;
 
-	for (cur = *head; cur != pos; cur = cur->next) { }
+	if (*head == pos) {
+		*head = new_device;
+		return 1;
+	}		
+
+	for (cur = *head; cur->next != pos; cur = cur->next) { }
 
 	cur->next = new_device;
 
-	return 0;
+	return 1;
 }
 
 
@@ -145,9 +133,10 @@ int omemo_device_list_remove(struct device_list **head,
 		struct device_list *next = (*head)->next;
 		free(*head);
 		*head = next;
+		return 0;
 	}
 
-	for (cur = *head; cur != NULL; cur = cur->next) {
+	for (cur = *head; cur->next != NULL; cur = cur->next) {
 		if (cur->next->device == device) {
 			struct device_list *tmp = cur->next;
 			cur->next = cur->next->next;
@@ -184,6 +173,7 @@ int omemo_device_list_free_device(struct device_list **head,
 	retval = omemo_device_list_remove(head, device);
 
 	if (retval < 0) {
+		errno = EINVAL;
 		return -1;
 	}
 
@@ -194,14 +184,16 @@ int omemo_device_list_free_device(struct device_list **head,
 
 void omemo_device_list_free(struct device_list **head)
 {
-	if (!head) {
+	if (!head || !(*head)) {
 		return;
 	}
 
-	while ((*head)->device != NULL) {
-		omemo_device_list_free_device(head, (*head)->device);
-	}
+	while ((*head) != NULL) {
+		struct device_list *tmp;
+		omemo_device_free((*head)->device);
 
-	free(*head);
-	*head = NULL;
+		tmp = (*head);
+		*head = (*head)->next;
+		free(tmp);		
+	}
 }

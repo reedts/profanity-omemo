@@ -20,22 +20,23 @@ TEST(omemo_device, creation)
 	omemo_device_free(test_device);
 }
 
-TEST(device_list, create_new)
+
+TEST(device_list, add_device)
 {
 	int retval;
 	struct device_list *list;
 
-	retval = omemo_device_list_create(&list);
+	struct omemo_device *device = omemo_device_create("test", 1337);
 
-	ASSERT_EQ(retval, 0);
-	if (retval < 0) {
-		perror("list_create");
-	}
-	ASSERT_EQ(list->device, nullptr);
+	retval = omemo_device_list_add(&list, device);
+
+	ASSERT_EQ(retval, 1);
+
 	ASSERT_EQ(list->next, nullptr);
+	ASSERT_EQ(list->device, device);
 
 	omemo_device_list_free(&list);
 
 	ASSERT_EQ(list, nullptr);
 }
-
+	
