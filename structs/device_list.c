@@ -160,7 +160,7 @@ uint32_t omemo_device_list_size(struct device_list **head)
 	uint32_t size = 0;
 	struct device_list *cur;
 
-	for (cur = *head; cur->next != NULL; cur = cur->next, size++)
+	for (cur = *head; cur != NULL; ++size, cur = cur->next)
 	{ }
 
 	return size;
