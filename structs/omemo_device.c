@@ -14,10 +14,10 @@ struct omemo_device *omemo_device_create(const char *jid, uint32_t id)
 	struct omemo_device *new_device = malloc(sizeof(struct omemo_device));
 
 	if (new_device) {
-		size_t jid_length = strlen(jid);
+		size_t jid_length = strlen(jid) + 1; //Null-Terminating
 		new_device->jid = malloc(jid_length);
-
-		memcpy(new_device->jid, jid, jid_length);
+		
+		strncpy(new_device->jid, jid, jid_length);
 
 		new_device->id = id;
 		new_device->trust = UNDECIDED;
