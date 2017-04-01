@@ -19,3 +19,23 @@ TEST(omemo_device, creation)
 
 	omemo_device_free(test_device);
 }
+
+TEST(device_list, create_new)
+{
+	int retval;
+	struct device_list *list;
+
+	retval = omemo_device_list_create(&list);
+
+	ASSERT_EQ(retval, 0);
+	if (retval < 0) {
+		perror("list_create");
+	}
+	ASSERT_EQ(list->device, nullptr);
+	ASSERT_EQ(list->next, nullptr);
+
+	omemo_device_list_free(&list);
+
+	ASSERT_EQ(list, nullptr);
+}
+
