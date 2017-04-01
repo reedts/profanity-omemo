@@ -7,11 +7,6 @@ int omemo_device_list_create(struct device_list **head)
 {
 	struct device_list *new_head;
 
-	if (!head) {
-		errno = EINVAL;
-		return -1;
-	}
-
 	new_head = malloc(sizeof(struct device_list));
 
 	if (!new_head) {
@@ -203,9 +198,10 @@ void omemo_device_list_free(struct device_list **head)
 		return;
 	}
 
-	while ((*head) != NULL) {
+	while ((*head)->device != NULL) {
 		omemo_device_list_free_device(head, (*head)->device);
 	}
 
-	head = NULL;
+	free(*head);
+	*head = NULL;
 }
