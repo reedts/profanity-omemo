@@ -51,6 +51,7 @@ int omemo_store_device_list(struct device_list *list)
 	char path[256];
 	char *home;
 	FILE *devices;
+	size_t devices_written = 0;
 	struct device_list *cur;
 	struct stat st = {0};
 
@@ -85,13 +86,27 @@ int omemo_store_device_list(struct device_list *list)
 	}
 
 	for (cur = list; cur != NULL; cur = cur->next) {
-		if (list->device->status == ACTIVE) {
-			char tmp[32];
-			snprintf(tmp, sizeof(tmp), "%d", list->device->id);
-			fputs(tmp, devices);
-			if (cur->next != NULL) {
-				fputs(",", devices);
+		if (cur->device->status == ACTIVE) {
+			if (devices_written) {
+				fputs(devices, ",");
 			}
+			fprintf(devices, "%d", cur->device->id);
+			devices_written++;
+		}
+	}
+
+	if (fputs("\nI:", devices) == EOF) {
+		return -1;
+	}
+	
+	devices_written = 0;
+	for (cur = list; cur != NULL; cur = cur->next) {
+		if (cur->device->status == INACTIVE) {
+			if (devices_written) {
+				fputs(devices, ",");
+			}
+			fprintf(devices, "%d", cur->device->id);
+			devices_written++;
 		}
 	}
 
