@@ -1,6 +1,7 @@
 #ifndef PROF_OMEMO_DEVICE_LIST_H
 #define PROF_OMEMO_DEVICE_LIST_H
 
+#include <libxml/tree.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -14,6 +15,33 @@ struct device_list {
 	struct omemo_device *device;
 };
 
+
+/**
+ * @brief Creates a XML device list
+ *
+ * Memory for the buffer has to be freed manually.
+ *
+ * @param root XML root node where output should begin
+ * @param head Device list to serialize
+ *
+ * @retval 0 Device list successfully serialized
+ * @retval -1 An error occurred and `errno` is set to indicate the cause
+ */
+int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **head);
+
+
+/**
+ * @brief Creates a device list from XML input
+ *
+ * @param head Device list to create
+ * @param node `xmlNodePtr` to start parsing from
+ * @param jid JID of device owner
+ *
+ * @return Number of devices found or `-1` if an error occurred which will
+ *         set `errno` accordingly
+ */
+int omemo_device_list_deserialize(struct device_list **head, xmlNodePtr node,
+				  const char *jid);
 
 /**
  * @brief Adds an OMEMO device to the begin of the device list.

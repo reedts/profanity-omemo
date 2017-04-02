@@ -1,7 +1,8 @@
 #include <gtest.h>
 
-#include "../structs/device_list.h"
-#include "../structs/omemo_device.h"
+#include <structs/device_list.h>
+#include <structs/omemo_device.h>
+#include <xmpp/pubsub.h>
 
 #include "test_main.h"
 
@@ -180,4 +181,21 @@ TEST(device_list, inval_input)
 	
 	ASSERT_EQ(omemo_device_list_free_device(NULL, in_list), -1);
 	ASSERT_EQ(omemo_device_list_free_device(&list, NULL), -1);
+
+	omemo_device_list_free(&list);
+	omemo_device_free(in_list);
+}
+
+TEST(pubsub, xml_output)
+{
+	struct device_list *list = NULL;
+	struct omemo_device *device = NULL;
+
+	device = omemo_device_create("test@test.test", 1337);
+
+	omemo_device_list_add(&list, device);
+
+	omemo_publish_device_list("test@test.test", &list);
+
+	omemo_device_list_free(&list);
 }

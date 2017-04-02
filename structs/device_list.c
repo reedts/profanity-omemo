@@ -1,7 +1,44 @@
 #include <errno.h>
+#include <libxml/tree.h>
 #include <stdlib.h>
+#include <xmpp/xmpp_constants.h>
+
 #include "device_list.h"
 #include "omemo_device.h"
+
+
+
+int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **list)
+{
+	struct device_list *cur;
+	xmlNodePtr list_root = NULL;
+	xmlNsPtr ns_list = NULL;
+
+
+	list_root = xmlNewNode(ns_list, BAD_CAST "list");
+	ns_list = xmlNewNs(list_root, BAD_CAST OMEMO_DEVICE_LIST_XML_NS, NULL);
+	if (!ns_list) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	xmlAddChild(*root, list_root);
+
+	for (cur = *list; cur != NULL; cur = cur->next) {
+		xmlNodePtr device = xmlNewChild(list_root, NULL, BAD_CAST "device", NULL);
+		char id_str[32];
+		snprintf(id_str, sizeof(id_str), "%d", cur->device->id);
+		xmlSetProp(device, BAD_CAST "id", BAD_CAST id_str);
+	}
+
+	return 0;
+}
+
+int omemo_device_list_deserialize(struct device_list **head, xmlNodePtr node,
+				  const char *jid)
+{
+	return 0;
+}
 
 
 int omemo_device_list_add(struct device_list **head,
