@@ -45,11 +45,13 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -std=c99")
 
 include_directories (${PROJECT_SOURCE_DIR})
 
+include ("${PROJECT_SOURCE_DIR}/store/CMakeLists.txt")
 include ("${PROJECT_SOURCE_DIR}/structs/CMakeLists.txt")
 include ("${PROJECT_SOURCE_DIR}/xmpp/CMakeLists.txt")
 
 add_library (
 	profanity-omemo SHARED
+	${STORE_SRC}
 	${STRUCTS_SRC}
 	${XMPP_SRC}
 )

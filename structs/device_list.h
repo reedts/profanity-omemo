@@ -27,7 +27,7 @@ struct device_list {
  * @retval 0 Device list successfully serialized
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
-int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **head);
+int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **head);
 
 
 /**
@@ -40,8 +40,9 @@ int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **head);
  * @return Number of devices found or `-1` if an error occurred which will
  *         set `errno` accordingly
  */
-int omemo_device_list_deserialize(struct device_list **head, xmlNodePtr node,
+int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
 				  const char *jid);
+
 
 /**
  * @brief Adds an OMEMO device to the begin of the device list.

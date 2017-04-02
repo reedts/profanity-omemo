@@ -1,5 +1,6 @@
 #include <gtest.h>
 
+#include <store/store_io.h>
 #include <structs/device_list.h>
 #include <structs/omemo_device.h>
 #include <xmpp/pubsub.h>
@@ -196,6 +197,10 @@ TEST(pubsub, xml_output)
 	omemo_device_list_add(&list, device);
 
 	omemo_publish_device_list("test@test.test", &list);
+
+	if (omemo_store_device_list(list) < 0) {
+		perror("omemo_store_device_list");
+	}
 
 	omemo_device_list_free(&list);
 }
