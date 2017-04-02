@@ -1,7 +1,7 @@
 #include <errno.h>
 #include <libxml/tree.h>
 #include <stdlib.h>
-#include <xmpp/xmpp_constants.h>
+#include <xmpp/omemo_constants.h>
 
 #include "device_list.h"
 #include "omemo_device.h"

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <structs/device_list.h>
-#include <xmpp/xmpp_constants.h>
+#include <xmpp/omemo_constants.h>
 
 #include "pubsub.h"
 
