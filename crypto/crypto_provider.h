@@ -1,9 +1,13 @@
 #ifndef PROF_OMEMO_CRYPTO_PROVIDER_H
 #define PROF_OMEMO_CRYPTO_PROVIDER_H
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define UNUSED(x) (void)(x)
 
 extern signal_crypto_provider omemo_crypto_provider;
 
@@ -18,6 +22,8 @@ int omemo_hmac_sha256_update(void *hmac_context, const uint8_t *data,
 
 int omemo_hmac_sha256_final(void *hmac_context, signal_buffer **output,
 			    void *user_data);
+
+void omemo_hmac_sha256_cleanup(void *hmac_context, void *user_data);
 
 int omemo_sha512_digest_init(void **digest_context, void *user_data);
 
