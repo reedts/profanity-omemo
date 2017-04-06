@@ -88,7 +88,7 @@ int omemo_store_device_list(struct device_list *list)
 	for (cur = list; cur != NULL; cur = cur->next) {
 		if (cur->device->status == ACTIVE) {
 			if (devices_written) {
-				fputs(devices, ",");
+				fputs(",", devices);
 			}
 			fprintf(devices, "%d", cur->device->id);
 			devices_written++;
@@ -103,7 +103,7 @@ int omemo_store_device_list(struct device_list *list)
 	for (cur = list; cur != NULL; cur = cur->next) {
 		if (cur->device->status == INACTIVE) {
 			if (devices_written) {
-				fputs(devices, ",");
+				fputs(",", devices);
 			}
 			fprintf(devices, "%d", cur->device->id);
 			devices_written++;

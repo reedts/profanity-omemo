@@ -11,6 +11,7 @@ extern "C" {
 
 extern signal_crypto_provider omemo_crypto_provider;
 
+int omemo_init_provider(void);
 
 int omemo_random_numbers(uint8_t *data, size_t len, void *user_data);
 
