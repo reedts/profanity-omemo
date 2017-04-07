@@ -1,6 +1,4 @@
 #include <gcrypt.h>
-#include <gnutls/gnutls.h>
-#include <gnutls/crypto.h>
 #include <signal/signal_protocol.h>
 
 #include "crypto_provider.h"
@@ -139,16 +137,16 @@ int omemo_sha512_digest_init(void **digest_context, void *user_data)
 		return SG_ERR_INVAL;
 	}
 
-	int retval = 0;
-	gnutls_hash_hd_t *hd = NULL;
+	gcry_error_t err = GPG_ERR_NO_ERROR;
+	gcry_md_hd_t *hd = NULL;
 
-	hd = malloc(sizeof(gnutls_hash_hd_t));
+	hd = malloc(sizeof(gcry_md_hd_t));
 	if (!hd) {
 		return SG_ERR_NOMEM;
 	}
 
-	retval = gnutls_hash_init(hd, GNUTLS_DIG_SHA512);
-	if (retval < 0) {
+	err = gcry_md_open(hd, GCRY_MD_SHA512, 0);
+	if (err < 0) {
 		return SG_ERR_UNKNOWN;
 	}
 
@@ -167,13 +165,9 @@ int omemo_sha512_digest_update(void *digest_context, const uint8_t *data,
 		return SG_ERR_INVAL;
 	}
 	
-	int retval = 0;
-	gnutls_hash_hd_t *hd = digest_context;
+	gcry_md_hd_t *hd = digest_context;
 
-	retval = gnutls_hash(*hd, data, data_len);
-	if (retval < 0) {
-		return SG_ERR_UNKNOWN;
-	}
+	gcry_md_write(*hd, data, data_len);
 
 	return 0;
 }
@@ -187,14 +181,18 @@ int omemo_sha512_digest_final(void *digest_context, signal_buffer **output,
 		return SG_ERR_INVAL;
 	}
 	
-	gnutls_hash_hd_t *hd = digest_context;
+	uint8_t *buffer = NULL;
+	gcry_md_hd_t *hd = digest_context;
 	signal_buffer *out = NULL;
 	size_t len;
 
-	len = gnutls_hash_get_len(GNUTLS_DIG_SHA512);
-	uint8_t buffer[len];
+	len = gcry_md_get_algo_dlen(GCRY_MD_SHA512);
 
-	gnutls_hash_output(*hd, buffer);
+	buffer = gcry_md_read(*hd, GCRY_MD_SHA512);
+	if (!buffer) {
+		puts("digest final error");
+		return SG_ERR_UNKNOWN;
+	}
 
 	out = signal_buffer_create(buffer, len);
 	if (!out) {
@@ -216,9 +214,9 @@ void omemo_sha512_digest_cleanup(void *digest_context, void *user_data)
 		return;
 	}
 	
-	gnutls_hash_hd_t *hd = digest_context;
+	gcry_md_hd_t *hd = digest_context;
 
-	gnutls_hash_deinit(*hd, NULL);
+	gcry_md_close(*hd);
 
 	//free(digest_context);
 }
