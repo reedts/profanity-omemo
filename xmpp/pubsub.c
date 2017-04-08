@@ -34,7 +34,7 @@ int omemo_publish_device_list(const char *jid, struct device_list **list)
 	item = xmlNewNode(NULL, BAD_CAST "item");
 	xmlAddChild(publish, item);
 
-	if (omemo_device_list_serialize(&item, list) < 0) {
+	if (omemo_device_list_serialize_xml(&item, list) < 0) {
 		return -1;
 	}
 

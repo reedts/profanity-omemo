@@ -8,7 +8,7 @@
 
 
 
-int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **list)
+int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
 {
 	struct device_list *cur;
 	xmlNodePtr list_root = NULL;
@@ -34,7 +34,7 @@ int omemo_device_list_serialize(xmlNodePtr *root, struct device_list **list)
 	return 0;
 }
 
-int omemo_device_list_deserialize(struct device_list **head, xmlNodePtr node,
+int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
 				  const char *jid)
 {
 	return 0;
