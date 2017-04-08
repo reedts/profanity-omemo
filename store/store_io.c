@@ -13,7 +13,7 @@
 
 #include "store_io.h"
 
-static int omemo_mk_user_dir(const char *path)
+static int omemo_mk_dir(const char *path)
 {
 	char path_buf[PATH_MAX];
 	char *p = NULL;
@@ -46,9 +46,9 @@ static int omemo_mk_user_dir(const char *path)
 }
 
 
-int omemo_store_device_list(struct device_list *list)
+int omemo_store_device_list(const char *nick, struct device_list *list)
 {
-	char path[256];
+	char path[PATH_MAX];
 	char *home;
 	FILE *devices;
 	size_t devices_written = 0;
@@ -59,13 +59,21 @@ int omemo_store_device_list(struct device_list *list)
 
 	memset(path, 0x0, sizeof(path));
 
-	strncpy(path, home, strlen(home));
+	strncpy(path, home, sizeof(path));
 	strcat(path, OMEMO_WORKING_DIR);
-	strncat(path, list->device->jid, strlen(list->device->jid));
+	strncat(path, nick, sizeof(path) - strlen(path));
 	
+	/* if the device list belongs to someone else */
+	if (strncmp(nick, list->device->jid, strlen(nick))) {
+		strncat(path, "/contacts/", sizeof(path) - strlen(path));
+		strncat(path, list->device->jid, strlen(list->device->jid));
+	}
+
+	puts(path);
+
 	if (stat(path, &st) != 0) {
 		if (errno == ENOENT) {
-			if (omemo_mk_user_dir(path) != 0) {
+			if (omemo_mk_dir(path) != 0) {
 				return -1;
 			}
 		} else {
