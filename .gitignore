@@ -34,7 +34,9 @@
 
 # global Build directory
 build/*
+lib/*
 test/ext/*
+ext/*
 
 # VIM workspace
 *.swp
