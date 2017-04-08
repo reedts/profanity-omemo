@@ -217,8 +217,7 @@ void omemo_sha512_digest_cleanup(void *digest_context, void *user_data)
 	gcry_md_hd_t *hd = digest_context;
 
 	gcry_md_close(*hd);
-
-	//free(digest_context);
+	free(digest_context);
 }
 
 
