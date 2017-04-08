@@ -30,18 +30,32 @@ include_directories("${source_dir}/googletest/include"
 
 ###############################################################################
 
-find_library (LIBSIGNAL libsignal-protocol-c.a)
+set (LIBSIGNAL_DIR "${PROJECT_SOURCE_DIR}/ext/libsignal")
+set (LIBSIGNAL_INCLUDE_DIR "${LIBSIGNAL_DIR}/src/libsignal/src")
+
+ExternalProject_Add (
+	libsignal
+	GIT_REPOSITORY "https://github.com/WhisperSystems/libsignal-protocol-c.git"
+	GIT_TAG "master"
+	PREFIX ${LIBSIGNAL_DIR}
+	SOURCE_DIR ""
+	BINARY_DIR libsignal
+	CMAKE_ARGS -D CMAKE_C_FLAGS=-fPIC -Wswitch -Wunused-variable -Wunused-value -Wshadow -Wint-conversion -Wpointer-sign -Wprotocol -Wshorten-64-to-32
+	INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libsignal/src/libsignal-protocol-c.a ${LIBSIGNAL_DIR}/
+)
+
+include_directories (${LIBSIGNAL_INCLUDE_DIR})
+
+set (LIBSIGNAL ${LIBSIGNAL_DIR}/libsignal-protocol-c.a)
 find_library (LIBGCRYPT libgcrypt.so)
 find_package (LibXml2 REQUIRED)
-find_package (GnuTLS REQUIRED)
 
 include_directories (${LIBXML2_INCLUDE_DIR})
 
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/lib/DEBUG)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/lib/DEBUG)
-
-set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/lib/DEBUG)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PROJECT_SOURCE_DIR}/lib/DEBUG) 
+set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -std=c99 -fPIC")
 
@@ -60,7 +74,9 @@ add_library (
 	${XMPP_SRC}
 )
 
+add_dependencies (profanity-omemo libsignal)
+
 target_link_libraries (profanity-omemo "${LIBSIGNAL}" "${LIBXML2_LIBRARIES}"
-	"${LIBGCRYPT}" "${GNUTLS_LIBRARIES}")
+	"${LIBGCRYPT}")
 
 add_subdirectory ("${PROJECT_SOURCE_DIR}/test")

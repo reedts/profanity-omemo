@@ -1,5 +1,5 @@
 #include <gcrypt.h>
-#include <signal/signal_protocol.h>
+#include <signal_protocol.h>
 
 #include "crypto_provider.h"
 

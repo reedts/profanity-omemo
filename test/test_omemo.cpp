@@ -1,6 +1,6 @@
 #include <gtest.h>
 #include <gcrypt.h>
-#include <signal/signal_protocol.h>
+#include <signal_protocol.h>
 
 #include <crypto/crypto_provider.h>
 #include <store/store_io.h>
