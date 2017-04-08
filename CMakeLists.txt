@@ -5,6 +5,7 @@ project (profanity-omemo)
 ###############################################################################
 # for testing
 find_package (Threads REQUIRED)
+include (CTest)
 include (ExternalProject)
 
 ExternalProject_Add (
@@ -13,7 +14,6 @@ ExternalProject_Add (
 	PREFIX ${PROJECT_SOURCE_DIR}/test/ext
 	INSTALL_COMMAND ""
 )
-
 # Get GTest informations
 ExternalProject_Get_Property (gtest source_dir binary_dir)
 
