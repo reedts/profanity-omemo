@@ -69,8 +69,6 @@ int omemo_store_device_list(const char *nick, struct device_list *list)
 		strncat(path, list->device->jid, strlen(list->device->jid));
 	}
 
-	puts(path);
-
 	if (stat(path, &st) != 0) {
 		if (errno == ENOENT) {
 			if (omemo_mk_dir(path) != 0) {
