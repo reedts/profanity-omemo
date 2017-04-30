@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 
+#include <signal_protocol_types.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,8 +23,7 @@ typedef enum _device_status {
 } device_status;
 
 struct omemo_device {
-	uint32_t id;
-	char *jid;
+	signal_protocol_address address;
 
 	device_trust trust;
 	device_status status;
@@ -40,7 +41,7 @@ struct omemo_device {
  * @return `NULL` if an error occured, a pointer to the created OMEMO device
  *	   otherwise.
  */
-struct omemo_device *omemo_device_create(const char *jid, uint32_t id);
+struct omemo_device *omemo_device_create(const char *jid, int32_t id);
 
 /**
  * @brief Deallocates memory for an OMEMO device.

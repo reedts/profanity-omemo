@@ -106,7 +106,7 @@ int omemo_device_list_contains(struct device_list **head,
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
 int omemo_device_list_contains_id(struct device_list **head,
-				  uint32_t id);
+				  int32_t id);
 
 /**
  * @brief Removes a device from the list.

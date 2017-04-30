@@ -27,7 +27,7 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
 	for (cur = *list; cur != NULL; cur = cur->next) {
 		xmlNodePtr device = xmlNewChild(list_root, NULL, BAD_CAST "device", NULL);
 		char id_str[32];
-		snprintf(id_str, sizeof(id_str), "%d", cur->device->id);
+		snprintf(id_str, sizeof(id_str), "%d", cur->device->address.device_id);
 		xmlSetProp(device, BAD_CAST "id", BAD_CAST id_str);
 	}
 
@@ -137,7 +137,7 @@ int omemo_device_list_contains(struct device_list **head,
 
 
 int omemo_device_list_contains_id(struct device_list **head,
-				  uint32_t id)
+				  int32_t id)
 {
 	struct device_list *cur;
 
@@ -147,7 +147,7 @@ int omemo_device_list_contains_id(struct device_list **head,
 	}
 
 	for (cur = *head; cur != NULL; cur = cur->next) {
-		if (cur->device->id == id) {
+		if (cur->device->address.device_id == id) {
 			return 1;
 		}
 	}
@@ -233,4 +233,6 @@ void omemo_device_list_free(struct device_list **head)
 		*head = (*head)->next;
 		free(tmp);		
 	}
+
+	*head = NULL;
 }
