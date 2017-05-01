@@ -16,11 +16,11 @@ TEST(store, store_user_device_list)
 	
 	std::string result("A:1337\nI:1000");
 	std::string dir(std::getenv("HOME"));
-	dir += OMEMO_WORKING_DIR;
-	dir += std::string(nick.name) + std::string("/");
+	dir += std::string("/") + std::string(OMEMO_WORKING_DIR);
+	dir += std::string("/") + std::string(nick.name) + std::string("/");
 	dir += std::to_string(nick.device_id);
 	dir += "/devices";
-	
+
 	ASSERT_TRUE(!omemo_store_device_list(&nick, list));
 	std::fstream f(dir.c_str());
 	ASSERT_TRUE(f.good());
@@ -48,11 +48,12 @@ TEST(store, store_contacts_device_list)
 	
 	std::string result("A:1337\nI:1000");
 	std::string dir(std::getenv("HOME"));
-	dir += OMEMO_WORKING_DIR;
-	dir += std::string(nick.name) + std::string("/");
+	dir += std::string("/") + std::string(OMEMO_WORKING_DIR);
+	dir += std::string("/") + std::string(nick.name) + std::string("/");
 	dir += std::to_string(nick.device_id);
 	dir += "/contacts/notTest@test.test"; dir += "/devices";
-
+	
+	
 	ASSERT_TRUE(!omemo_store_device_list(&nick, list));
 	std::fstream f(dir.c_str());
 	ASSERT_TRUE(f.good());
