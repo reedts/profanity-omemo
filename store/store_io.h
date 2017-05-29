@@ -10,7 +10,7 @@ extern "C" {
 
 struct device_list;
 
-extern struct signal_protocol_session_store omemo_session_store;
+extern signal_protocol_session_store omemo_session_store;
 
 /**
  * @brief Stores a device list persistently
