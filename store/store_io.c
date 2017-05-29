@@ -430,3 +430,14 @@ int omemo_delete_all_sessions(const char *name, size_t name_len,
 
 void omemo_session_store_destroy(void *user_data)
 { }
+
+struct signal_protocol_session_store omemo_session_store = {
+	.load_session_func		= omemo_load_session,
+	.get_sub_device_sessions_func	= omemo_get_sub_device_sessions,
+	.store_session_func		= omemo_store_session,
+	.contains_session_func		= omemo_contains_session,
+	.delete_session_func		= omemo_delete_session,
+	.delete_all_sessions_func	= omemo_delete_all_sessions,
+	.destroy_func			= omemo_session_store_destroy
+};
+
