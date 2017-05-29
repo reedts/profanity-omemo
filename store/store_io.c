@@ -2,8 +2,14 @@
 #define _POSIX_C_SOURCE 200809L
 #endif
 
+#if _XOPEN_SOURCE <= 500 || !defined( _XOPEN_SOURCE )
+#define _XOPEN_SOURCE 500
+#endif
+
+#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <ftw.h>
 #include <linux/limits.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -98,10 +104,11 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 						  "/%s", file);
 		}
 	} else {
-		bytes_written += !strcmp(file, dev_file_name)
-			? snprintf(buffer + bytes_written, buf_len-bytes_written,
+		bytes_written += (!strcmp(file, dev_file_name)
+				  || !user->device_id)
+			? snprintf(buffer+bytes_written, buf_len-bytes_written,
 				   "/%s/%s", "contacts", user->name)
-			: snprintf(buffer + bytes_written, buf_len-bytes_written,
+			: snprintf(buffer+bytes_written, buf_len-bytes_written,
 				   "/%s/%s/%d", "contacts", user->name,
 				   user->device_id)
 			;
@@ -123,7 +130,35 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 	
 	return 0;
 }
-	
+
+/**
+ * @brief Deletes a node in file tree walk
+ *
+ * @retval 0	The node was removed successfully
+ * @retval -1	An error occurred while removing the node
+ */
+int omemo_delete_cb(const char *fpath, const struct stat *sb, int typeflag,
+		    struct FTW *ftwbuf)
+{
+	if (remove(fpath))
+		return -1;
+	else
+		return 0;
+}
+
+/**
+ * @brief Deletes a directory recursively
+ *
+ * @param path	The path to delete
+ * 
+ * @retval 0	The directory was removed successfully
+ * @retval -1	An error occurred while removing the directory
+ */
+int omemo_rm_dir(const char *path)
+{
+	return nftw(path, omemo_delete_cb, 64, FTW_DEPTH | FTW_PHYS);
+}
+
 
 int omemo_store_device_list(const signal_protocol_address *user,
 			    struct device_list *list)
@@ -252,5 +287,146 @@ err_cleanup:
 int omemo_get_sub_device_sessions(signal_int_list **sessions, const char *name,
 				  size_t name_len, void *user_data)
 {
+	char buffer[PATH_MAX];
+	DIR *dir;
+	int size, retval;
+	struct dirent *folder;
+	struct signal_protocol_address user_addr = {
+		.name = name,
+		.name_len = name_len,
+		.device_id = 0
+	};
 
+	size = 0;
+
+	if (!name)
+		return SG_ERR_INVAL;
+	
+	memset(buffer, 0x0, sizeof(buffer));
+	
+	/* TODO: Get local user! */
+	retval = omemo_get_dir(NULL, &user_addr, NULL, buffer, sizeof(buffer));
+	if (retval < 0) {
+		return SG_ERR_UNKNOWN;
+	} else if (!retval) {
+		return 0;
+	}
+
+	dir = opendir(buffer);
+	if (!dir) 
+		return SG_ERR_UNKNOWN;
+	
+	*sessions = signal_int_list_alloc();
+	if (!*sessions) 
+		return SG_ERR_UNKNOWN;
+
+	while ((folder = readdir(dir))) {
+		int device_id = atoi(folder->d_name);
+		signal_int_list_push_back(*sessions, device_id);
+		++size;
+	}
+	
+	closedir(dir);
+	return size;
 }
+
+int omemo_store_session(const signal_protocol_address *address, uint8_t *record,
+			size_t record_len, void *user_data)
+{
+	char buffer[PATH_MAX];
+	FILE *se_file;
+	int retval;
+	size_t bytes_written;
+	
+	memset(buffer, 0x0, sizeof(buffer));
+	
+	/* TODO: get local user! */
+	retval = omemo_get_dir(NULL, address, se_file_name, buffer,
+			       sizeof(buffer));
+	if (retval < 0) 
+		return SG_ERR_UNKNOWN;
+	
+	se_file = fopen(buffer, "w");
+	if (!se_file)
+		return SG_ERR_UNKNOWN;
+
+	bytes_written = fwrite(record, 1, record_len, se_file);
+	if (bytes_written < record_len) {
+		fclose(se_file);
+		return SG_ERR_UNKNOWN;
+	}
+
+	fclose(se_file);
+	return 0;
+}
+
+int omemo_contains_session(const signal_protocol_address *address,
+			   void *user_data)
+{
+	char buffer[PATH_MAX];
+	int retval;
+	
+	/* TODO: get local user! */
+	retval = omemo_get_dir(NULL, address, NULL, buffer, sizeof(buffer));
+
+	return (retval == 0) ? 1 : 0;
+}
+
+int omemo_delete_session(const signal_protocol_address *address,
+			 void *user_data)
+{
+	char buffer[PATH_MAX];
+	int retval;
+
+	memset(buffer, 0x0, sizeof(buffer));
+	
+	/* TODO: get local user! */
+	retval = omemo_get_dir(NULL, address, NULL, buffer, sizeof(buffer));
+	if (retval < 0)
+		return SG_ERR_UNKNOWN;
+	else if (retval)
+		return 0;
+
+	return omemo_rm_dir(buffer);
+}
+
+int omemo_delete_all_sessions(const char *name, size_t name_len,
+			      void *user_data)
+{
+	char buffer[PATH_MAX];
+	DIR *dir;
+	int retval, se_deleted;
+	struct dirent *folder;
+	signal_protocol_address user_addr = {
+		.name = name,
+		.name_len = name_len,
+		.device_id = 0
+	};
+
+	se_deleted = 0;
+
+	memset(buffer, 0x0, sizeof(buffer));
+	
+	/* TODO: get local user! */
+	retval = omemo_get_dir(NULL, &user_addr, NULL, buffer, sizeof(buffer));
+	if (retval < 0)
+		return SG_ERR_UNKNOWN;
+	else if (retval)
+		return 0;
+
+	dir = opendir(buffer);
+	if (!dir)
+		return SG_ERR_UNKNOWN;
+
+	while ((folder = readdir(dir)))
+		++se_deleted;
+	
+	retval = omemo_rm_dir(buffer);
+	if (retval < 0)
+		return retval;
+	else
+		return se_deleted;
+}
+
+void omemo_session_store_destroy(void *user_data)
+{ }

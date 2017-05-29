@@ -21,7 +21,8 @@ extern struct signal_protocol_session_store omemo_session_store;
  * @retval 0 The device list was stored successfully
  * @retval -1 An error occurred and `errno` was set to indicate the cause
  */
-int omemo_store_device_list(const signal_protocol_address *user, struct device_list *list);
+int omemo_store_device_list(const signal_protocol_address *user,
+			    struct device_list *list);
 
 
 /* From Libsignal for signal_protocol_session_store */
