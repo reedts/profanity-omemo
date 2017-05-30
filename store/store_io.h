@@ -11,6 +11,7 @@ extern "C" {
 struct device_list;
 
 extern signal_protocol_session_store omemo_session_store;
+extern signal_protocol_pre_key_store omemo_pre_key_store;
 
 /**
  * @brief Stores a device list persistently
@@ -47,6 +48,19 @@ int omemo_delete_all_sessions(const char *name, size_t name_len,
 
 void omemo_session_store_destroy(void *user_data);
 
+
+/* From Libsignal for signal_protocol_pre_key_store */
+int omemo_load_pre_key(signal_buffer **record, uint32_t pre_key_id,
+		       void *user_data);
+
+int omemo_store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
+			void *user_data);
+
+int omemo_contains_pre_key(uint32_t pre_key_id, void *user_data);
+
+int omemo_remove_pre_key(uint32_t pre_key_id, void *user_data);
+
+void omemo_pre_key_store_destroy(void *user_data); 
 
 #ifdef __cplusplus
 }
