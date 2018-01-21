@@ -1,6 +1,5 @@
-#ifndef PROF_OMEMO_STORE_IO_H
-#define PROF_OMEMO_STORE_IO_H
-
+#ifndef PROF_OMEMO_STORE_H
+#define PROF_OMEMO_STORE_H
 
 #include <signal_protocol.h>
 
@@ -8,11 +7,17 @@
 extern "C" {
 #endif
 
+struct omemo_store_context {
+	signal_protocol_session_store session_store;
+	signal_protocol_pre_key_store pre_key_store;
+	signal_protocol_signed_pre_key_store signed_pre_key_store;
+	signal_protocol_identity_key_store identity_key_store;
+};
+
+
 struct device_list;
 
-extern signal_protocol_session_store omemo_session_store;
-extern signal_protocol_pre_key_store omemo_pre_key_store;
-extern signal_protocol_signed_pre_key_store omemo_signed_pre_key_store;
+extern struct omemo_store_context omemo_store_context;
 
 /**
  * @brief Stores a device list persistently
@@ -77,8 +82,23 @@ int omemo_remove_signed_pre_key(uint32_t pre_key_id, void *user_data);
 
 void omemo_signed_pre_key_store_destroy(void *user_data); 
 
+
+/* From Libsignal for signal_protocol_idendity_key_store */
+int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_data,
+				void *user_data);
+
+int omemo_get_local_registration_id(void *user_data, uint32_t *registration_id);
+
+int omemo_save_identity(const signal_protocol_address *address, uint8_t *key_data,
+			size_t key_len, void *user_data);
+
+int omemo_is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
+			      size_t key_len, void *user_data);
+
+void omemo_identity_key_store_destroy(void *user_data);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* PROF_OMEMO_STORE_IO_H */
+#endif /* PROF_OMEMO_STORE_H */

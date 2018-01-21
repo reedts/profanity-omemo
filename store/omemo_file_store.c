@@ -20,13 +20,49 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <xmpp/omemo_constants.h>
-
-#include "store_io.h"
+#include <store/omemo_store.h>
 
 static const char se_file_name[] = "session";
 static const char dev_file_name[] = "devices";
 static const char pre_key_folder_name[] = "pre_keys";
 static const char signed_pre_key_folder_name[] = "signed_pre_keys";
+static const char id_pub_key_file_name[] = "id_key.pub";
+static const char id_priv_key_file_name[] = "id_key.priv";
+
+/* extern */
+struct omemo_store_context omemo_store_context = {
+	.session_store = {
+		.load_session_func		= omemo_load_session,
+		.get_sub_device_sessions_func	= omemo_get_sub_device_sessions,
+		.store_session_func		= omemo_store_session,
+		.contains_session_func		= omemo_contains_session,
+		.delete_session_func		= omemo_delete_session,
+		.delete_all_sessions_func	= omemo_delete_all_sessions,
+		.destroy_func			= omemo_session_store_destroy
+	},
+	.pre_key_store = {
+		.load_pre_key			= omemo_load_pre_key,
+		.store_pre_key			= omemo_store_pre_key,
+		.contains_pre_key		= omemo_contains_pre_key,
+		.remove_pre_key			= omemo_remove_pre_key,
+		.destroy_func			= omemo_pre_key_store_destroy
+	},
+	.signed_pre_key_store = {
+		.load_signed_pre_key		= omemo_load_signed_pre_key,
+		.store_signed_pre_key		= omemo_store_signed_pre_key,
+		.contains_signed_pre_key	= omemo_contains_signed_pre_key,
+		.remove_signed_pre_key		= omemo_remove_signed_pre_key,
+		.destroy_func			= omemo_signed_pre_key_store_destroy
+	},
+	.identity_key_store = {
+		.get_identity_key_pair		= omemo_get_identity_key_pair,
+		.get_local_registration_id	= omemo_get_local_registration_id,
+		.save_identity			= omemo_save_identity,
+		.is_trusted_identity		= omemo_is_trusted_identity,
+		.destroy_func			= omemo_identity_key_store_destroy
+	}
+};
+
 
 static int omemo_mk_dir(const char *path)
 {
@@ -149,6 +185,34 @@ omemo_get_signed_pre_key_store(const signal_protocol_address *local_user,
 	}
 
 	return (stat(buffer, &st) < 0) ? 1 : 0;
+}
+
+static int omemo_get_identity_key_store(const signal_protocol_address *local_user,
+					char *buffer, size_t buf_len)
+{
+	size_t bytes_written;
+	struct stat st = {0};
+
+	if (!local_user || !buffer) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
+				 OMEMO_WORKING_DIR);
+
+	bytes_written += snprintf(buffer + bytes_written, local_user->name_len,
+				  "/%s", local_user->name);
+
+	bytes_written += snprintf(buffer + bytes_written, buf_len - bytes_written,
+				  "%d/", local_user->device_id);
+
+	if (bytes_written > buf_len) {
+		errno = ENOBUFS;
+		return -1;
+	}
+
+	return (stat(buffer, &st) < 0) ? 1: 0;
 }
 
 /**
@@ -689,15 +753,6 @@ void omemo_pre_key_store_destroy(void *user_data)
 { }
 
 
-signal_protocol_pre_key_store omemo_pre_key_store = {
-	.load_pre_key		= omemo_load_pre_key,
-	.store_pre_key		= omemo_store_pre_key,
-	.contains_pre_key	= omemo_contains_pre_key,
-	.remove_pre_key		= omemo_remove_pre_key,
-	.destroy_func		= omemo_pre_key_store_destroy
-};
-
-
 int omemo_load_signed_pre_key(signal_buffer **record,
 			      uint32_t signed_pre_key_id, void *user_data)
 {
@@ -848,10 +903,121 @@ int omemo_remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 void omemo_signed_pre_key_store_destroy(void *user_data)
 { }
 
-signal_protocol_signed_pre_key_store omemo_signed_pre_key_store = {
-	.load_signed_pre_key		= omemo_load_signed_pre_key,
-	.store_signed_pre_key		= omemo_store_signed_pre_key,
-	.contains_signed_pre_key	= omemo_contains_signed_pre_key,
-	.remove_signed_pre_key		= omemo_remove_signed_pre_key,
-	.destroy_func			= omemo_signed_pre_key_store_destroy
-};
+
+int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_data,
+				void *user_data)
+{
+	char buffer[PATH_MAX];
+	FILE *priv_key_file;
+	FILE *pub_key_file;
+	int retval;
+	size_t path_len;
+	size_t bytes_free;
+	uint8_t *priv_key_buffer;
+	uint8_t *pub_key_buffer;
+	struct stat st = {0};
+
+	memset(buffer, 0x0, sizeof(buffer));
+
+	/* TODO: Get local user! */
+	retval = omemo_get_identity_key_store(NULL, buffer, sizeof(buffer));
+	if (retval)
+		return SG_ERR_UNKNOWN;
+
+	path_len = strlen(buffer);
+	bytes_free = sizeof(buffer) - path_len;
+	
+	/* Load private key */
+	if (snprintf(buffer + path_len, bytes_free, "/%s", id_priv_key_file_name)
+	    >= bytes_free) {
+		return SG_ERR_UNKNOWN;
+	}
+
+	priv_key_file = fopen(buffer, "r");
+	if (!priv_key_file) {
+		return SG_ERR_INVALID_KEY_ID;
+	}
+
+	if (fstat(fileno(priv_key_file), &st) < 0) {
+		fclose(priv_key_file);
+		return SG_ERR_INVALID_KEY_ID;
+	}
+
+	priv_key_buffer = malloc(st.st_size);
+	if (!priv_key_buffer) {
+		fclose(priv_key_file);
+		return SG_ERR_UNKNOWN;
+	}
+
+	if (fread(priv_key_buffer, 1, st.st_size, priv_key_file) < st.st_size) {
+		fclose(priv_key_file);
+		free(priv_key_buffer);
+		return SG_ERR_UNKNOWN;
+	}
+
+	*private_data = signal_buffer_create(priv_key_buffer, st.st_size);
+	if (!(*private_data)) {
+		fclose(priv_key_file);
+		free(priv_key_buffer);
+		return SG_ERR_UNKNOWN;
+	}
+	
+	fclose(priv_key_file);
+
+	/* Load public key */
+	if (snprintf(buffer + path_len, bytes_free, "/%s", id_pub_key_file_name)
+	    >= bytes_free) {
+		return SG_ERR_UNKNOWN;
+	}
+	
+	pub_key_file = fopen(buffer, "r");
+	if (!pub_key_file) {
+		return SG_ERR_INVALID_KEY_ID;
+	}
+
+	if (fstat(fileno(pub_key_file), &st) < 0) {
+		fclose(pub_key_file);
+		return SG_ERR_INVALID_KEY_ID;
+	}
+
+	pub_key_buffer = malloc(st.st_size);
+	if (!pub_key_buffer) {
+		fclose(pub_key_file);
+		return SG_ERR_UNKNOWN;
+	}
+
+	if (fread(pub_key_buffer, 1, st.st_size, pub_key_file) < st.st_size) {
+		fclose(pub_key_file);
+		free(pub_key_buffer);
+		return SG_ERR_UNKNOWN;
+	}
+
+	*public_data = signal_buffer_create(pub_key_buffer, st.st_size);
+	if (!(*public_data)) {
+		fclose(pub_key_file);
+		free(pub_key_buffer);
+		return SG_ERR_UNKNOWN;
+	}
+	
+	fclose(pub_key_file);
+	
+	return SG_SUCCESS;
+}
+
+int omemo_get_local_registration_id(void *user_data, uint32_t *registration_id)
+{
+}
+
+int omemo_save_identity(const signal_protocol_address *address, uint8_t *key_data,
+			size_t key_len, void *user_data)
+{
+}
+
+int omemo_is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
+			      size_t key_len, void *user_data)
+{
+}
+
+void omemo_identity_key_store_destroy(void *user_data)
+{
+}

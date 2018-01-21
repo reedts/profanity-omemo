@@ -1,5 +1,5 @@
 set (
 	STORE_SRC
-	store/store_io.h
-	store/store_io.c
+	store/omemo_file_store.c
+	store/omemo_store.h
 )

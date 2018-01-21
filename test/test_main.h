@@ -7,7 +7,7 @@
 #include <fstream>
 
 #include <crypto/crypto_provider.h>
-#include <store/store_io.h>
+#include <store/omemo_store.h>
 #include <structs/device_list.h>
 #include <structs/omemo_device.h>
 #include <xmpp/pubsub.h>
