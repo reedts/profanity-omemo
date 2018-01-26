@@ -1006,16 +1006,29 @@ int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **pri
 
 int omemo_get_local_registration_id(void *user_data, uint32_t *registration_id)
 {
+	if (!registration_id) {
+		return SG_ERR_INVAL;
+	}
+
+	/* default value for OMEMO, only important for signal */
+	*registration_id = 0;
+
+	return SG_SUCCESS;
 }
 
 int omemo_save_identity(const signal_protocol_address *address, uint8_t *key_data,
 			size_t key_len, void *user_data)
 {
+	/* Not needed as OMEMO handles device management */
+
+	return SG_SUCCESS;
 }
 
 int omemo_is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
 			      size_t key_len, void *user_data)
 {
+	/* Trust management is done by OMEMO */
+	return 1;
 }
 
 void omemo_identity_key_store_destroy(void *user_data)
