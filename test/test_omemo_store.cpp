@@ -63,5 +63,22 @@ TEST(store, store_contacts_device_list)
 	ASSERT_TRUE(content == result);
 
 	omemo_device_list_free(&list);
+}
 
+TEST(store, is_local_user_existant)
+{
+	signal_protocol_address nick = {"test", 4, 1337};
+	signal_protocol_address false_nick = {"notTest", 7, 1000};
+	struct device_list *list = NULL;
+	struct omemo_device *device = NULL;
+
+	device = omemo_device_create("test@test.test", 1337);
+	
+	omemo_device_list_add(&list, device);
+
+	ASSERT_TRUE(!omemo_store_device_list(&nick, list));
+	ASSERT_TRUE(omemo_is_local_user_existent(&nick) == 1);
+	ASSERT_TRUE(omemo_is_local_user_existent(&false_nick) == 0);
+
+	omemo_device_list_free(&list);
 }
