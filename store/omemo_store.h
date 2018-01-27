@@ -31,6 +31,7 @@ extern struct omemo_store_context omemo_store_context;
 int omemo_store_device_list(const signal_protocol_address *user,
 			    struct device_list *list);
 
+int omemo_is_local_user_existent(const signal_protocol_address *address);
 
 /* From Libsignal for signal_protocol_session_store */
 int omemo_load_session(signal_buffer **record,

@@ -378,6 +378,19 @@ int omemo_store_device_list(const signal_protocol_address *user,
 
 }
 
+int omemo_is_local_user_existent(const signal_protocol_address *address)
+{
+	char buffer[PATH_MAX];
+
+	if (!address) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	return omemo_get_dir(NULL, address, NULL, buffer, sizeof(buffer));
+}
+
+
 int omemo_load_session(signal_buffer **record,
 		       const signal_protocol_address *address, void *user_data)
 {
