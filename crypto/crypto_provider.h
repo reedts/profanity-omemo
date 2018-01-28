@@ -7,6 +7,9 @@
 extern "C" {
 #endif
 
+#define AES_CTR_ENCRYPT 1
+#define AES_CTR_DECRYPT 0
+
 #define UNUSED(x) (void)(x)
 
 extern signal_crypto_provider omemo_crypto_provider;

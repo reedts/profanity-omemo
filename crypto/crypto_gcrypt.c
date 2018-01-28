@@ -3,6 +3,7 @@
 
 #include "crypto_provider.h"
 
+
 int omemo_init_provider()
 {
 	if (!gcry_check_version(NULL)) {
@@ -220,20 +221,309 @@ void omemo_sha512_digest_cleanup(void *digest_context, void *user_data)
 	free(digest_context);
 }
 
+static int omemo_endecrypt_aes_ctr(signal_buffer **output, const uint8_t *key,
+				   size_t key_len, const uint8_t *iv,
+				   size_t iv_len, const uint8_t *text,
+				   size_t text_len, int mode)
+{
+	int cipher_mode = GCRY_CIPHER_MODE_CTR;
+	int cipher_algo;
+	gcry_cipher_hd_t handle;
+	uint8_t *buffer;
+	gcry_error_t err = GPG_ERR_NO_ERROR;
+	signal_buffer *output_buffer;
+	
+	switch (key_len) {
+	case 16:
+		cipher_algo = GCRY_CIPHER_AES128;
+		break;
+	case 24:
+		cipher_algo = GCRY_CIPHER_AES192;
+		break;
+	case 32:
+		cipher_algo = GCRY_CIPHER_AES256;
+		break;
+	default:
+		puts("unknown cipher length");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_open(&handle, cipher_algo, cipher_mode, 0);
+	if (err) {
+		puts("cipher open error");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setkey(handle, key, key_len);
+	if (err) {
+		puts("cipher set key error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setiv(handle, iv, iv_len);
+	if (err) {
+		puts("cipher set iv error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	buffer = malloc(text_len);
+	if (!buffer) {
+		gcry_cipher_close(handle);
+		return SG_ERR_NOMEM;
+	}
+
+	if (mode == AES_CTR_ENCRYPT) {
+		err = gcry_cipher_encrypt(handle, buffer, text_len, text, text_len);
+	} else {
+		err = gcry_cipher_decrypt(handle, buffer, text_len, text, text_len);
+	}
+	if (err) {
+		puts("encrypt/decrypt error");
+		gcry_cipher_close(handle);
+		free(buffer);
+		return SG_ERR_UNKNOWN;
+	}
+
+	output_buffer = signal_buffer_create(buffer, text_len);
+	if (!output_buffer) {
+		gcry_cipher_close(handle);
+		free(buffer);
+		return SG_ERR_NOMEM;
+	}
+
+	gcry_cipher_close(handle);
+	free(buffer);
+
+	*output = output_buffer;
+
+	return 0;
+}
+
+static int omemo_encrypt_aes_cbc(signal_buffer **output,
+				 const uint8_t *key, size_t key_len,
+				 const uint8_t *iv, size_t iv_len,
+				 const uint8_t *plaintext, size_t plaintext_len)
+{
+	int cipher_mode = GCRY_CIPHER_MODE_CBC;
+	int cipher_algo;
+	gcry_cipher_hd_t handle;
+	gcry_error_t err = GPG_ERR_NO_ERROR;
+	uint8_t *buffer;
+	uint8_t *plaintext_padded;
+	size_t block_size;
+	size_t padding_len;
+	size_t plaintext_padded_len;
+	signal_buffer *output_buffer;
+
+	switch (key_len) {
+	case 16:
+		cipher_algo = GCRY_CIPHER_AES128;
+		break;
+	case 32:
+		cipher_algo = GCRY_CIPHER_AES192;
+		break;
+	case 64:
+		cipher_algo = GCRY_CIPHER_AES256;
+		break;
+	default:
+		puts("unknown cipher length");
+		return SG_ERR_UNKNOWN;
+	}
+
+	block_size = gcry_cipher_get_algo_blklen(cipher_algo);
+	if (!block_size) {
+		puts("cipher block length error");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_open(&handle, cipher_algo, cipher_mode, 0);
+	if (err) {
+		puts("cipher open error");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setkey(handle, key, key_len);
+	if (err) {
+		puts("cipher set key error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setiv(handle, iv, iv_len);
+	if (err) {
+		puts("cipher set iv error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	padding_len = block_size - (plaintext_len % block_size);
+	plaintext_padded_len = plaintext_len + padding_len;
+	plaintext_padded = malloc(plaintext_padded_len);
+	if (!plaintext_padded) {
+		return SG_ERR_NOMEM;
+	}
+
+	memset(plaintext_padded, (uint8_t) padding_len, plaintext_padded_len);
+	memcpy(plaintext_padded, plaintext, plaintext_len);
+	
+	buffer = malloc(plaintext_padded_len);
+	if (!buffer) {
+		free(plaintext_padded);
+		gcry_cipher_close(handle);
+		return SG_ERR_NOMEM;
+	}
+
+	err = gcry_cipher_encrypt(handle, buffer, plaintext_padded_len, plaintext_padded,
+				  plaintext_padded_len);
+	if (err) {
+		puts("cipher encrypt error");
+		gcry_cipher_close(handle);
+		free(plaintext_padded);
+		free(buffer);
+		return SG_ERR_UNKNOWN;
+	}
+	
+	output_buffer = signal_buffer_create(buffer, plaintext_padded_len);
+	if (!output_buffer) {
+		gcry_cipher_close(handle);
+		free(plaintext_padded);
+		free(buffer);
+		return SG_ERR_NOMEM;
+	}
+
+	*output = output_buffer;
+	
+	gcry_cipher_close(handle);
+	free(plaintext_padded);
+	free(buffer);
+
+	return 0;
+}
 
 int omemo_encrypt(signal_buffer **output, int cipher,
 		  const uint8_t *key, size_t key_len,
 		  const uint8_t *iv, size_t iv_len,
 		  const uint8_t *plaintext, size_t plaintext_len,
 		  void *user_data)
-{ }
+{
+	UNUSED(user_data);
+	
+	if (!output || !key || !iv || !plaintext) {
+		return SG_ERR_UNKNOWN;
+	}
+
+	if (cipher == SG_CIPHER_AES_CTR_NOPADDING) {
+		return omemo_endecrypt_aes_ctr(output, key, key_len, iv, iv_len, plaintext, plaintext_len, AES_CTR_ENCRYPT);
+	} else if (cipher == SG_CIPHER_AES_CBC_PKCS5) {
+		return omemo_encrypt_aes_cbc(output, key, key_len, iv, iv_len, plaintext, plaintext_len);
+	} else {
+		return SG_ERR_UNKNOWN;
+	}
+}
+
+static int omemo_decrypt_aes_cbc(signal_buffer **output, const uint8_t *key,
+				 size_t key_len, const uint8_t *iv,
+				 size_t iv_len, const uint8_t *ciphertext,
+				 size_t ciphertext_len)
+{
+	int cipher_mode = GCRY_CIPHER_MODE_CBC;
+	int cipher_algo;
+	gcry_cipher_hd_t handle;
+	gcry_error_t err = GPG_ERR_NO_ERROR;
+	uint8_t *buffer;
+	signal_buffer *output_buffer;
+	size_t padding_len;
+	size_t plaintext_unpadded_len;
+
+	switch (key_len) {
+	case 16:
+		cipher_algo = GCRY_CIPHER_AES128;
+		break;
+	case 32:
+		cipher_algo = GCRY_CIPHER_AES192;
+		break;
+	case 64:
+		cipher_algo = GCRY_CIPHER_AES256;
+		break;
+	default:
+		puts("unknown cipher length");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_open(&handle, cipher_algo, cipher_mode, 0);
+	if (err) {
+		puts("cipher open error");
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setkey(handle, key, key_len);
+	if (err) {
+		puts("cipher set key error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	err = gcry_cipher_setiv(handle, iv, iv_len);
+	if (err) {
+		puts("cipher set iv error");
+		gcry_cipher_close(handle);
+		return SG_ERR_UNKNOWN;
+	}
+
+	buffer = malloc(ciphertext_len);
+	if (!buffer) {
+		gcry_cipher_close(handle);
+		return SG_ERR_NOMEM;
+	}
+
+	err = gcry_cipher_decrypt(handle, buffer, ciphertext_len, ciphertext, ciphertext_len);
+	if (err) {
+		puts("cipher encrypt error");
+		gcry_cipher_close(handle);
+		free(buffer);
+		return SG_ERR_UNKNOWN;
+	}
+
+	padding_len = buffer[ciphertext_len-1];
+	plaintext_unpadded_len = ciphertext_len - padding_len;
+
+	output_buffer = signal_buffer_create(buffer, plaintext_unpadded_len);
+	if (!output_buffer) {
+		gcry_cipher_close(handle);
+		free(buffer);
+		return SG_ERR_NOMEM;
+	}
+
+	*output = output_buffer;
+	
+	gcry_cipher_close(handle);
+	free(buffer);
+
+	return 0;
+}
 
 int omemo_decrypt(signal_buffer **output, int cipher,
 		  const uint8_t *key, size_t key_len,
 		  const uint8_t *iv, size_t iv_len,
 		  const uint8_t *ciphertext, size_t ciphertext_len,
 		  void *user_data)
-{ }
+{
+	UNUSED(user_data);
+
+	if (!output || !key || !iv || !ciphertext) {
+		return SG_ERR_UNKNOWN;
+	}
+
+	if (cipher == SG_CIPHER_AES_CTR_NOPADDING) {
+		return omemo_endecrypt_aes_ctr(output, key, key_len, iv, iv_len, ciphertext, ciphertext_len, AES_CTR_DECRYPT);
+	} else if (cipher == SG_CIPHER_AES_CBC_PKCS5) {
+		return omemo_decrypt_aes_cbc(output, key, key_len, iv, iv_len, ciphertext, ciphertext_len);
+	} else {
+		return SG_ERR_UNKNOWN;
+	}
+}
 
 
 signal_crypto_provider omemo_crypto_provider = {
