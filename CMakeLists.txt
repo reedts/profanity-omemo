@@ -40,7 +40,7 @@ ExternalProject_Add (
 	PREFIX ${LIBSIGNAL_DIR}
 	SOURCE_DIR ""
 	BINARY_DIR libsignal
-	CMAKE_ARGS -D CMAKE_C_FLAGS=-fPIC -Wswitch -Wunused-variable -Wunused-value -Wshadow -Wint-conversion -Wpointer-sign -Wprotocol -Wshorten-64-to-32
+	CMAKE_ARGS -DCMAKE_BUILD_TYPE=Debug -D CMAKE_C_FLAGS=-fPIC -Wswitch -Wunused-variable -Wunused-value -Wshadow -Wint-conversion -Wpointer-sign -Wprotocol -Wshorten-64-to-32
 	INSTALL_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/libsignal/src/libsignal-protocol-c.a ${LIBSIGNAL_DIR}/
 )
 
@@ -61,14 +61,16 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -pedantic -std=c99 -fPIC")
 
 include_directories (${PROJECT_SOURCE_DIR})
 
-include ("${PROJECT_SOURCE_DIR}/crypto/CMakeLists.txt")
-include ("${PROJECT_SOURCE_DIR}/store/CMakeLists.txt")
-include ("${PROJECT_SOURCE_DIR}/structs/CMakeLists.txt")
-include ("${PROJECT_SOURCE_DIR}/xmpp/CMakeLists.txt")
+include ("${PROJECT_SOURCE_DIR}/crypto/targets.cmake")
+include ("${PROJECT_SOURCE_DIR}/profanity/targets.cmake")
+include ("${PROJECT_SOURCE_DIR}/store/targets.cmake")
+include ("${PROJECT_SOURCE_DIR}/structs/targets.cmake")
+include ("${PROJECT_SOURCE_DIR}/xmpp/targets.cmake")
 
 add_library (
 	profanity-omemo SHARED
 	${CRYPTO_SRC}
+	${PROF_OMEMO_SRC}
 	${STORE_SRC}
 	${STRUCTS_SRC}
 	${XMPP_SRC}
