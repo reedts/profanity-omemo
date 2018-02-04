@@ -14,10 +14,10 @@ struct omemo_store_context {
 	signal_protocol_identity_key_store identity_key_store;
 };
 
-
+struct omemo_context;
 struct device_list;
 
-extern struct omemo_store_context omemo_store_context;
+struct omemo_store_context *omemo_store_context_create(struct omemo_context *context);
 
 /**
  * @brief Stores a device list persistently
@@ -34,7 +34,7 @@ int omemo_store_device_list(const signal_protocol_address *user,
 int omemo_is_local_user_existent(const signal_protocol_address *address);
 
 /* From Libsignal for signal_protocol_session_store */
-int omemo_load_session(signal_buffer **record,
+int omemo_load_session(signal_buffer **record, signal_buffer **user_record,
 		       const signal_protocol_address *address, void *user_data);
 
 int omemo_get_sub_device_sessions(signal_int_list **sessions,
@@ -42,7 +42,8 @@ int omemo_get_sub_device_sessions(signal_int_list **sessions,
 				  void *user_data);
 
 int omemo_store_session(const signal_protocol_address *address, uint8_t *record,
-			size_t record_len, void *user_data);
+			size_t record_len, uint8_t *user_record, size_t user_record_len,
+			void *user_data);
 
 int omemo_contains_session(const signal_protocol_address *address,
 			   void *user_data);
