@@ -62,20 +62,20 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -pedantic -std=c99 -fPIC")
 include_directories (${PROJECT_SOURCE_DIR})
 
 include ("${PROJECT_SOURCE_DIR}/crypto/targets.cmake")
-include ("${PROJECT_SOURCE_DIR}/omemo/targets.cmake")
 include ("${PROJECT_SOURCE_DIR}/profanity/targets.cmake")
 include ("${PROJECT_SOURCE_DIR}/store/targets.cmake")
 include ("${PROJECT_SOURCE_DIR}/structs/targets.cmake")
 include ("${PROJECT_SOURCE_DIR}/xmpp/targets.cmake")
+include ("${PROJECT_SOURCE_DIR}/omemo/targets.cmake")
 
 add_library (
 	profanity-omemo SHARED
 	${CRYPTO_SRC}
-	${OMEMO_SRC}
-	${PROF_OMEMO_SRC}
 	${STORE_SRC}
 	${STRUCTS_SRC}
 	${XMPP_SRC}
+	${OMEMO_SRC}
+	${PROFANITY_SRC}
 )
 
 add_dependencies (profanity-omemo libsignal)

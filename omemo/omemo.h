@@ -19,7 +19,7 @@ int omemo_install(struct omemo_context *context);
 /**
  * Called only once to initialize internal states, typically when the plugin is loaded.
  */
-void omemo_hook_init(void);
+void omemo_init(void);
 
 /**
  * Registers the given JID into the plugin structures.
@@ -27,30 +27,30 @@ void omemo_hook_init(void);
  *
  * @param barejid The JID of the account to be registered
  */
-void omemo_hook_add_account(const char *barejid);
+void omemo_init_account(const char *barejid);
 
 /**
- * Encrypts the given message.
+ * Encrypts the given stanza.
  * Encrypted stanza will be sent using stanza_sender and plaintext message will be displayed using message_displayer.
  * @param barejid JID of the account sending the message.
  * @param receiver_jid Receiver's JID.
- * @param message Message to be encrypted.
+ * @param msg_stanza Message to be encrypted.
  */
-void omemo_hook_encrypt(const char *barejid, const char *receiver_jid, const char *message);
+char *omemo_send_encrypted(const char *barejid, const char *receiver_jid, const char *msg_stanza);
 
 /**
- * Decrypts the given ciphertext
+ * Decrypts the given stanza
  * @param barejid JID of the account receiving the message.
  * @param sender_jid JID of the message sender.
- * @param ciphertext Message to be decrypted
+ * @param ciphertext_stanza Message to be decrypted
  * @return The decrypted message, ready to be displayed to the user.
  */
-char *omemo_hook_decrypt(const char *barejid, const char *sender_jid, const char *ciphertext);
+char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *ciphertext_stanza);
 
 /**
  * Called when the client is shutting down
  */
-void omemo_hook_shutdown(void);
+void omemo_shutdown(void);
 
 /**
  * Sets the message shower, a function capable of displaying a message in the chat window.
@@ -58,12 +58,6 @@ void omemo_hook_shutdown(void);
  * @param msg_shower Function capable of displaying a message in the user interface.
  */
 void omemo_set_msg_displayer(omemo_msg_displayer msg_displayer);
-
-/**
- * Sets the stanza sender, a function capable of sending an XMPP stanza.
- * @param stanza_sender Function capable of sending an XMPP stanza.
- */
-void omemo_set_stanza_sender(omemo_stanza_sender stanza_sender);
 
 /**
  * Sets the stanza sender, a function capable of sending an XMPP stanza.

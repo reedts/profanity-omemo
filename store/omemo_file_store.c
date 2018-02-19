@@ -33,7 +33,7 @@ static const char id_priv_key_file_name[] = "id_key.priv";
 struct omemo_store_context *omemo_store_context_create(struct omemo_context *context)
 {
 	struct omemo_store_context *store_context;
-	const static struct omemo_store_context store_compound_init = {
+	static const struct omemo_store_context store_compound_init = {
 		.session_store = {
 			.load_session_func		= omemo_load_session,
 			.get_sub_device_sessions_func	= omemo_get_sub_device_sessions,

@@ -1,3 +1,3 @@
-set (PROF_OMEMO_SRC
+set (PROFANITY_SRC
         profanity/profanity.c
 )

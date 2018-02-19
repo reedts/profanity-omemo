@@ -2,15 +2,13 @@
 // Created by roobre on 2/18/18.
 //
 
+#include <signal_protocol.h>
 #include <errno.h>
+#include <stdio.h>
+#include <sys/time.h>
 #include <key_helper.h>
 #include <omemo/omemo.h>
 #include <omemo/omemo_constants.h>
-#include <stdio.h>
-#include <sys/time.h>
-// TODO: Write generic hooks and callbacks to make this client-agnostic.
-// Meanwhile, we'll just call profanity functions from here.
-#include <profapi.h>
 #include <structs/omemo_context.h>
 
 struct omemo_context ctx;
@@ -47,11 +45,11 @@ int omemo_install(struct omemo_context *context)
 		errno = ENOKEY;
 		return -1;
 	}
-	
+
 	gettimeofday(&tv, NULL);
-	msecs_epoch = (uint64_t)(tv.tv_sec) * 1000 + (uint64_t)(tv.tv_usec) / 1000;
+	msecs_epoch = (uint64_t) (tv.tv_sec) * 1000 + (uint64_t) (tv.tv_usec) / 1000;
 	retval = signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, identity_key_pair, 0,
-								    msecs_epoch, ctx);
+	                msecs_epoch, ctx);
 	if (retval < 0) {
 		errno = ENOKEY;
 		return -1;
@@ -86,34 +84,35 @@ int omemo_install(struct omemo_context *context)
 	return 0;
 }
 
-void omemo_hook_init(void)
+void omemo_init(void)
 {
-// TODO: Initialize stuff
+	// TODO: Initialize stuff
 }
 
-void omemo_hook_add_account(const char *barejid)
+void omemo_init_account(const char *barejid)
 {
-// TODO: Create context for barejid
+	// TODO: Create context for barejid
 }
 
-void omemo_hook_encrypt(const char *barejid, const char *receiver_jid, const char *message)
+char *omemo_send_encrypted(const char *barejid, const char *receiver_jid, const char *msg_stanza)
 {
 	// TODO: Actual encryption
-	ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
+//    ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
 	// Display original message
-	ctx.msg_displayer(receiver_jid, message);
-	// TODO: Compose a proper OMEMO stanza
-	ctx.stanza_sender(message);
+//    ctx.msg_displayer(receiver_jid, msg_stanza);
+
+	// TODO: Compose a proper OMEMO msg_stanza
+	return NULL;
 }
 
-char *omemo_hook_decrypt(const char *barejid, const char *sender_jid, const char *ciphertext)
+char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *ciphertext_stanza)
 {
 	// TODO: Actual encryption
-	ctx.logger(OMEMO_LOGLVL_DEBUG, "Decrypting message");
-	return ciphertext;
+//    ctx.logger(OMEMO_LOGLVL_DEBUG, "Decrypting message");
+	return NULL;
 }
 
-void omemo_hook_shutdown(void)
+void omemo_shutdown(void)
 {
 	// TODO: Something?
 }
