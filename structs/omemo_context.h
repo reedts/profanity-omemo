@@ -19,7 +19,7 @@ struct omemo_context {
 	pthread_mutex_t mutex;
 };
 
-struct omemo_context *omemo_context_create(const signal_protocol_address *address);
+struct omemo_context *omemo_context_create(const signal_protocol_address *own_address);
 
 void omemo_context_free(struct omemo_context *context);
 

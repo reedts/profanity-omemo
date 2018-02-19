@@ -21,12 +21,12 @@ static void omemo_unlock(void *user_data)
 	pthread_mutex_unlock(&context->mutex);
 }
 
-struct omemo_context *omemo_context_create(const signal_protocol_address *address)
+struct omemo_context *omemo_context_create(const signal_protocol_address *own_address)
 {
 	int retval;
 	struct omemo_context *context;
 
-	if (!address) {
+	if (!own_address) {
 		errno = EINVAL;
 		return NULL;
 	}
@@ -37,7 +37,7 @@ struct omemo_context *omemo_context_create(const signal_protocol_address *addres
 		return NULL;
 	}
 
-	memcpy(&context->own_address, address, sizeof(signal_protocol_address));
+	memcpy(&context->own_address, own_address, sizeof(signal_protocol_address));
 	context->store_context = omemo_store_context_create(context);
 	if (!context->store_context) {
 		return NULL;
