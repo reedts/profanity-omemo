@@ -1,0 +1,20 @@
+# brackets style
+--style=linux
+
+# tab indent
+--indent=tab
+-t8
+
+# references and pointers
+--align-reference=name
+--align-pointer=name
+
+# padding
+--pad-oper
+--pad-comma
+--pad-header
+
+# project options
+--exclude=ext
+--exclude=test/ext
+-i

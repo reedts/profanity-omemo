@@ -35,14 +35,14 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
 }
 
 int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
-				  const char *jid)
+                                      const char *jid)
 {
 	return 0;
 }
 
 
 int omemo_device_list_add(struct device_list **head,
-			  struct omemo_device *device)
+                          struct omemo_device *device)
 {
 	struct device_list *new_device;
 
@@ -73,8 +73,8 @@ int omemo_device_list_add(struct device_list **head,
 }
 
 int omemo_device_list_add_inplace(struct device_list **head,
-				  struct device_list *pos,
-				  struct omemo_device *device)
+                                  struct device_list *pos,
+                                  struct omemo_device *device)
 {
 	struct device_list *new_device, *cur;
 
@@ -82,7 +82,7 @@ int omemo_device_list_add_inplace(struct device_list **head,
 		errno = EINVAL;
 		return -1;
 	}
-	
+
 	if (!omemo_device_list_contains(head, pos->device)) {
 		errno = EINVAL;
 		return -1;
@@ -106,7 +106,7 @@ int omemo_device_list_add_inplace(struct device_list **head,
 	if (*head == pos) {
 		*head = new_device;
 		return 1;
-	}		
+	}
 
 	for (cur = *head; cur->next != pos; cur = cur->next) { }
 
@@ -117,7 +117,7 @@ int omemo_device_list_add_inplace(struct device_list **head,
 
 
 int omemo_device_list_contains(struct device_list **head,
-			       struct omemo_device *device)
+                               struct omemo_device *device)
 {
 	struct device_list *cur;
 
@@ -133,11 +133,11 @@ int omemo_device_list_contains(struct device_list **head,
 	}
 
 	return 0;
-}	
+}
 
 
 int omemo_device_list_contains_id(struct device_list **head,
-				  int32_t id)
+                                  int32_t id)
 {
 	struct device_list *cur;
 
@@ -157,7 +157,7 @@ int omemo_device_list_contains_id(struct device_list **head,
 
 
 int omemo_device_list_remove(struct device_list **head,
-			     struct omemo_device *device)
+                             struct omemo_device *device)
 {
 	struct device_list *cur;
 
@@ -204,7 +204,7 @@ uint32_t omemo_device_list_size(struct device_list **head)
 }
 
 int omemo_device_list_free_device(struct device_list **head,
-				  struct omemo_device *device)
+                                  struct omemo_device *device)
 {
 	int retval;
 	retval = omemo_device_list_remove(head, device);
@@ -231,7 +231,7 @@ void omemo_device_list_free(struct device_list **head)
 
 		tmp = (*head);
 		*head = (*head)->next;
-		free(tmp);		
+		free(tmp);
 	}
 
 	*head = NULL;

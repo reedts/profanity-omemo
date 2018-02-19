@@ -41,7 +41,7 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **head)
  *         set `errno` accordingly
  */
 int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
-				  const char *jid);
+                                      const char *jid);
 
 
 /**
@@ -54,13 +54,13 @@ int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node
  * @param device OMEMO device to add to the list
  *
  * @retval 1 The device was added to the list successfully
- * @retval 0 No errors occured but the device or an device with the same ID 
+ * @retval 0 No errors occured but the device or an device with the same ID
  *           is already in list.
  * @retval -1 An error occurred while adding the device to the list. `errno`
  *            is set to indicated the cause.
  */
 int omemo_device_list_add(struct device_list **head,
-			  struct omemo_device *device);
+                          struct omemo_device *device);
 
 /**
  * @brief Adds an OMEMO device at the current position of the device list.
@@ -73,14 +73,14 @@ int omemo_device_list_add(struct device_list **head,
  * @param device OMEMO device to add
  *
  * @retval 1 The device was added to the list successfully
- * @retval 0 No errors occured but the device or an device with the same ID 
+ * @retval 0 No errors occured but the device or an device with the same ID
  *           is already in list.
  * @retval -1 An error occurred while adding the device to the list. `errno`
  *            is set to indicated the cause.
  */
 int omemo_device_list_add_inplace(struct device_list **head,
-				  struct device_list *pos,
-				  struct omemo_device *device);
+                                  struct device_list *pos,
+                                  struct omemo_device *device);
 
 /**
  * @brief Checks if the list contains a device.
@@ -93,7 +93,7 @@ int omemo_device_list_add_inplace(struct device_list **head,
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
 int omemo_device_list_contains(struct device_list **head,
-			       struct omemo_device *device);
+                               struct omemo_device *device);
 
 /**
  * @brief Checks if the list contains a device with the ID.
@@ -106,7 +106,7 @@ int omemo_device_list_contains(struct device_list **head,
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
 int omemo_device_list_contains_id(struct device_list **head,
-				  int32_t id);
+                                  int32_t id);
 
 /**
  * @brief Removes a device from the list.
@@ -119,7 +119,7 @@ int omemo_device_list_contains_id(struct device_list **head,
  *            the cause
  */
 int omemo_device_list_remove(struct device_list **head,
-			     struct omemo_device *device);
+                             struct omemo_device *device);
 
 /**
  * @brief Get the number of devices in the list.
@@ -141,7 +141,7 @@ uint32_t omemo_device_list_size(struct device_list **head);
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
 int omemo_device_list_free_device(struct device_list **head,
-				  struct omemo_device *device);
+                                  struct omemo_device *device);
 
 /**
  * @brief Frees the device list and all devices it contains.

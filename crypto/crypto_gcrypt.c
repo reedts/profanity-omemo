@@ -28,14 +28,14 @@ int omemo_random_numbers(uint8_t *data, size_t len, void *user_data)
 }
 
 int omemo_hmac_sha256_init(void **hmac_context, const uint8_t *key,
-			   size_t data_len, void *user_data)
+                           size_t data_len, void *user_data)
 {
 	if (!hmac_context || !key) {
 		return SG_ERR_INVAL;
 	}
 
 	UNUSED(user_data);
-	
+
 	gcry_error_t err = GPG_ERR_NO_ERROR;
 	gcry_mac_hd_t *hd = NULL;
 
@@ -62,7 +62,7 @@ int omemo_hmac_sha256_init(void **hmac_context, const uint8_t *key,
 }
 
 int omemo_hmac_sha256_update(void *hmac_context, const uint8_t *data,
-			     size_t data_len, void *user_data)
+                             size_t data_len, void *user_data)
 {
 	if (!hmac_context || !data) {
 		return SG_ERR_INVAL;
@@ -83,7 +83,7 @@ int omemo_hmac_sha256_update(void *hmac_context, const uint8_t *data,
 }
 
 int omemo_hmac_sha256_final(void *hmac_context, signal_buffer **output,
-			     void *user_data)
+                            void *user_data)
 {
 	UNUSED(user_data);
 
@@ -95,7 +95,7 @@ int omemo_hmac_sha256_final(void *hmac_context, signal_buffer **output,
 	gcry_mac_hd_t *hd = hmac_context;
 	signal_buffer *sig_buffer = NULL;
 	size_t mac_len;
-	
+
 	mac_len = gcry_mac_get_algo_maclen(GCRY_MAC_HMAC_SHA256);
 	uint8_t buffer[mac_len];
 
@@ -125,7 +125,7 @@ void omemo_hmac_sha256_cleanup(void *hmac_context, void *user_data)
 	if (!hmac_context) {
 		return;
 	}
-	
+
 	gcry_mac_close(*hd);
 	free(hmac_context);
 }
@@ -133,7 +133,7 @@ void omemo_hmac_sha256_cleanup(void *hmac_context, void *user_data)
 int omemo_sha512_digest_init(void **digest_context, void *user_data)
 {
 	UNUSED(user_data);
-	
+
 	if (!digest_context) {
 		return SG_ERR_INVAL;
 	}
@@ -157,7 +157,7 @@ int omemo_sha512_digest_init(void **digest_context, void *user_data)
 }
 
 int omemo_sha512_digest_update(void *digest_context, const uint8_t *data,
-			       size_t data_len, void *user_data)
+                               size_t data_len, void *user_data)
 {
 	UNUSED(user_data);
 
@@ -165,7 +165,7 @@ int omemo_sha512_digest_update(void *digest_context, const uint8_t *data,
 		puts("digest update error");
 		return SG_ERR_INVAL;
 	}
-	
+
 	gcry_md_hd_t *hd = digest_context;
 
 	gcry_md_write(*hd, data, data_len);
@@ -174,14 +174,14 @@ int omemo_sha512_digest_update(void *digest_context, const uint8_t *data,
 }
 
 int omemo_sha512_digest_final(void *digest_context, signal_buffer **output,
-			      void *user_data)
+                              void *user_data)
 {
 	UNUSED(user_data);
 
 	if (!digest_context || !output) {
 		return SG_ERR_INVAL;
 	}
-	
+
 	uint8_t *buffer = NULL;
 	gcry_md_hd_t *hd = digest_context;
 	signal_buffer *out = NULL;
@@ -200,7 +200,7 @@ int omemo_sha512_digest_final(void *digest_context, signal_buffer **output,
 		puts("digest final error");
 		return SG_ERR_NOMEM;
 	}
-	
+
 	*output = out;
 
 	return 0;
@@ -214,7 +214,7 @@ void omemo_sha512_digest_cleanup(void *digest_context, void *user_data)
 		puts("digest cleanup error");
 		return;
 	}
-	
+
 	gcry_md_hd_t *hd = digest_context;
 
 	gcry_md_close(*hd);
@@ -222,9 +222,9 @@ void omemo_sha512_digest_cleanup(void *digest_context, void *user_data)
 }
 
 static int omemo_endecrypt_aes_ctr(signal_buffer **output, const uint8_t *key,
-				   size_t key_len, const uint8_t *iv,
-				   size_t iv_len, const uint8_t *text,
-				   size_t text_len, int mode)
+                                   size_t key_len, const uint8_t *iv,
+                                   size_t iv_len, const uint8_t *text,
+                                   size_t text_len, int mode)
 {
 	int cipher_mode = GCRY_CIPHER_MODE_CTR;
 	int cipher_algo;
@@ -232,7 +232,7 @@ static int omemo_endecrypt_aes_ctr(signal_buffer **output, const uint8_t *key,
 	uint8_t *buffer;
 	gcry_error_t err = GPG_ERR_NO_ERROR;
 	signal_buffer *output_buffer;
-	
+
 	switch (key_len) {
 	case 16:
 		cipher_algo = GCRY_CIPHER_AES128;
@@ -302,9 +302,9 @@ static int omemo_endecrypt_aes_ctr(signal_buffer **output, const uint8_t *key,
 }
 
 static int omemo_encrypt_aes_cbc(signal_buffer **output,
-				 const uint8_t *key, size_t key_len,
-				 const uint8_t *iv, size_t iv_len,
-				 const uint8_t *plaintext, size_t plaintext_len)
+                                 const uint8_t *key, size_t key_len,
+                                 const uint8_t *iv, size_t iv_len,
+                                 const uint8_t *plaintext, size_t plaintext_len)
 {
 	int cipher_mode = GCRY_CIPHER_MODE_CBC;
 	int cipher_algo;
@@ -367,7 +367,7 @@ static int omemo_encrypt_aes_cbc(signal_buffer **output,
 
 	memset(plaintext_padded, (uint8_t) padding_len, plaintext_padded_len);
 	memcpy(plaintext_padded, plaintext, plaintext_len);
-	
+
 	buffer = malloc(plaintext_padded_len);
 	if (!buffer) {
 		free(plaintext_padded);
@@ -376,7 +376,7 @@ static int omemo_encrypt_aes_cbc(signal_buffer **output,
 	}
 
 	err = gcry_cipher_encrypt(handle, buffer, plaintext_padded_len, plaintext_padded,
-				  plaintext_padded_len);
+	                          plaintext_padded_len);
 	if (err) {
 		puts("cipher encrypt error");
 		gcry_cipher_close(handle);
@@ -384,7 +384,7 @@ static int omemo_encrypt_aes_cbc(signal_buffer **output,
 		free(buffer);
 		return SG_ERR_UNKNOWN;
 	}
-	
+
 	output_buffer = signal_buffer_create(buffer, plaintext_padded_len);
 	if (!output_buffer) {
 		gcry_cipher_close(handle);
@@ -394,7 +394,7 @@ static int omemo_encrypt_aes_cbc(signal_buffer **output,
 	}
 
 	*output = output_buffer;
-	
+
 	gcry_cipher_close(handle);
 	free(plaintext_padded);
 	free(buffer);
@@ -403,13 +403,13 @@ static int omemo_encrypt_aes_cbc(signal_buffer **output,
 }
 
 int omemo_encrypt(signal_buffer **output, int cipher,
-		  const uint8_t *key, size_t key_len,
-		  const uint8_t *iv, size_t iv_len,
-		  const uint8_t *plaintext, size_t plaintext_len,
-		  void *user_data)
+                  const uint8_t *key, size_t key_len,
+                  const uint8_t *iv, size_t iv_len,
+                  const uint8_t *plaintext, size_t plaintext_len,
+                  void *user_data)
 {
 	UNUSED(user_data);
-	
+
 	if (!output || !key || !iv || !plaintext) {
 		return SG_ERR_UNKNOWN;
 	}
@@ -424,9 +424,9 @@ int omemo_encrypt(signal_buffer **output, int cipher,
 }
 
 static int omemo_decrypt_aes_cbc(signal_buffer **output, const uint8_t *key,
-				 size_t key_len, const uint8_t *iv,
-				 size_t iv_len, const uint8_t *ciphertext,
-				 size_t ciphertext_len)
+                                 size_t key_len, const uint8_t *iv,
+                                 size_t iv_len, const uint8_t *ciphertext,
+                                 size_t ciphertext_len)
 {
 	int cipher_mode = GCRY_CIPHER_MODE_CBC;
 	int cipher_algo;
@@ -486,7 +486,7 @@ static int omemo_decrypt_aes_cbc(signal_buffer **output, const uint8_t *key,
 		return SG_ERR_UNKNOWN;
 	}
 
-	padding_len = buffer[ciphertext_len-1];
+	padding_len = buffer[ciphertext_len - 1];
 	plaintext_unpadded_len = ciphertext_len - padding_len;
 
 	output_buffer = signal_buffer_create(buffer, plaintext_unpadded_len);
@@ -497,7 +497,7 @@ static int omemo_decrypt_aes_cbc(signal_buffer **output, const uint8_t *key,
 	}
 
 	*output = output_buffer;
-	
+
 	gcry_cipher_close(handle);
 	free(buffer);
 
@@ -505,10 +505,10 @@ static int omemo_decrypt_aes_cbc(signal_buffer **output, const uint8_t *key,
 }
 
 int omemo_decrypt(signal_buffer **output, int cipher,
-		  const uint8_t *key, size_t key_len,
-		  const uint8_t *iv, size_t iv_len,
-		  const uint8_t *ciphertext, size_t ciphertext_len,
-		  void *user_data)
+                  const uint8_t *key, size_t key_len,
+                  const uint8_t *iv, size_t iv_len,
+                  const uint8_t *ciphertext, size_t ciphertext_len,
+                  void *user_data)
 {
 	UNUSED(user_data);
 

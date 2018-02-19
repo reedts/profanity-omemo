@@ -27,7 +27,7 @@ struct omemo_device {
 
 	device_trust trust;
 	device_status status;
-	
+
 	/* keys go here */
 
 };

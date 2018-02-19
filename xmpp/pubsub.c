@@ -46,7 +46,7 @@ int omemo_publish_device_list(const char *jid, struct device_list **list)
 		return -1;
 	}
 
-	
+
 	/* Send the stanza here */
 	puts((char *)buf->content);
 

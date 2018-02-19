@@ -14,7 +14,7 @@ static void omemo_lock(void *user_data)
 	pthread_mutex_lock(&context->mutex);
 }
 
-static void omemo_unlock(void *user_data) 
+static void omemo_unlock(void *user_data)
 {
 	struct omemo_context *context = user_data;
 
@@ -36,7 +36,7 @@ struct omemo_context *omemo_context_create(const signal_protocol_address *addres
 		errno = ENOMEM;
 		return NULL;
 	}
-	
+
 	memcpy(&context->own_address, address, sizeof(signal_protocol_address));
 	context->store_context = omemo_store_context_create(context);
 	if (!context->store_context) {
@@ -53,7 +53,7 @@ struct omemo_context *omemo_context_create(const signal_protocol_address *addres
 	if (retval < 0) {
 		return NULL;
 	}
-	
+
 	pthread_mutex_init(&context->mutex, NULL);
 	retval = signal_context_set_locking_functions(context->signal_ctx, omemo_lock, omemo_unlock);
 	if (retval < 0) {
@@ -66,25 +66,25 @@ struct omemo_context *omemo_context_create(const signal_protocol_address *addres
 	}
 
 	retval = signal_protocol_store_context_set_session_store(context->signal_store_ctx,
-			&context->store_context->session_store);
+	                &context->store_context->session_store);
 	if (retval < 0) {
 		return NULL;
 	}
 
 	retval = signal_protocol_store_context_set_pre_key_store(context->signal_store_ctx,
-			&context->store_context->pre_key_store);
+	                &context->store_context->pre_key_store);
 	if (retval < 0) {
 		return NULL;
 	}
 
 	retval = signal_protocol_store_context_set_signed_pre_key_store(context->signal_store_ctx,
-			&context->store_context->signed_pre_key_store);
+	                &context->store_context->signed_pre_key_store);
 	if (retval < 0) {
 		return NULL;
 	}
 
 	retval = signal_protocol_store_context_set_identity_key_store(context->signal_store_ctx,
-			&context->store_context->identity_key_store);
+	                &context->store_context->identity_key_store);
 	if (retval < 0) {
 		return NULL;
 	}

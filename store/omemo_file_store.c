@@ -100,7 +100,7 @@ static int omemo_mk_dir(const char *path)
 		*strrchr(path_buf, '/') = 0;
 	}
 
-	for(p = path_buf + 1; *p; ++p) {
+	for (p = path_buf + 1; *p; ++p) {
 		if (*p == '/') {
 			*p = 0;
 			if (mkdir(path_buf, S_IRWXU) != 0) {
@@ -136,27 +136,27 @@ static int omemo_mk_dir(const char *path)
  *			cause
  */
 static int omemo_get_pre_key_store(const signal_protocol_address *local_user,
-				   char *buffer, size_t buf_len)
+                                   char *buffer, size_t buf_len)
 {
 	size_t bytes_written;
 	struct stat st = {0};
-	
+
 	if (!local_user || !buffer) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
-				 OMEMO_WORKING_DIR);
+	                         OMEMO_WORKING_DIR);
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
-				  "/%s", local_user->name);
+	                          "/%s", local_user->name);
 
 	bytes_written += snprintf(buffer + bytes_written,
-				  buf_len - bytes_written,
-				  "/%d/%s/", local_user->device_id,
-				  pre_key_folder_name);	
-	
+	                          buf_len - bytes_written,
+	                          "/%d/%s/", local_user->device_id,
+	                          pre_key_folder_name);
+
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
 		return -1;
@@ -181,27 +181,27 @@ static int omemo_get_pre_key_store(const signal_protocol_address *local_user,
  */
 static int
 omemo_get_signed_pre_key_store(const signal_protocol_address *local_user,
-			       char *buffer, size_t buf_len)
+                               char *buffer, size_t buf_len)
 {
 	size_t bytes_written;
 	struct stat st = {0};
-	
+
 	if (!local_user || !buffer) {
 		errno = EINVAL;
 		return -1;
 	}
 
 	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
-				 OMEMO_WORKING_DIR);
+	                         OMEMO_WORKING_DIR);
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
-				  "/%s", local_user->name);
+	                          "/%s", local_user->name);
 
 	bytes_written += snprintf(buffer + bytes_written,
-				  buf_len - bytes_written,
-				  "/%d/%s/", local_user->device_id,
-				  signed_pre_key_folder_name);	
-	
+	                          buf_len - bytes_written,
+	                          "/%d/%s/", local_user->device_id,
+	                          signed_pre_key_folder_name);
+
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
 		return -1;
@@ -211,7 +211,7 @@ omemo_get_signed_pre_key_store(const signal_protocol_address *local_user,
 }
 
 static int omemo_get_identity_key_store(const signal_protocol_address *local_user,
-					char *buffer, size_t buf_len)
+                                        char *buffer, size_t buf_len)
 {
 	size_t bytes_written;
 	struct stat st = {0};
@@ -222,20 +222,20 @@ static int omemo_get_identity_key_store(const signal_protocol_address *local_use
 	}
 
 	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
-				 OMEMO_WORKING_DIR);
+	                         OMEMO_WORKING_DIR);
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
-				  "/%s", local_user->name);
+	                          "/%s", local_user->name);
 
 	bytes_written += snprintf(buffer + bytes_written, buf_len - bytes_written,
-				  "%d/", local_user->device_id);
+	                          "%d/", local_user->device_id);
 
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
 		return -1;
 	}
 
-	return (stat(buffer, &st) < 0) ? 1: 0;
+	return (stat(buffer, &st) < 0) ? 1 : 0;
 }
 
 /**
@@ -258,8 +258,8 @@ static int omemo_get_identity_key_store(const signal_protocol_address *local_use
  */
 
 static int omemo_get_dir(const signal_protocol_address *local_user,
-			 const signal_protocol_address *user,
-			 const char *file, char *buffer, size_t buf_len)
+                         const signal_protocol_address *user,
+                         const char *file, char *buffer, size_t buf_len)
 {
 	if (!local_user || !buffer || !buf_len) {
 		errno = EINVAL;
@@ -270,31 +270,31 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 	struct stat st = {0};
 
 	bytes_written = snprintf(buffer, buf_len, "%s/%s/%s/%d",
-				 getenv("HOME"), OMEMO_WORKING_DIR, 
-				 local_user->name, local_user->device_id);
+	                         getenv("HOME"), OMEMO_WORKING_DIR,
+	                         local_user->name, local_user->device_id);
 
 	if (!user || !strncmp(local_user->name, user->name,
-			      local_user->name_len)) {
+	                      local_user->name_len)) {
 		/* local user and searched user are the same */
 		if (file) {
 			bytes_written += snprintf(buffer + bytes_written,
-						  buf_len - bytes_written,
-						  "/%s", file);
+			                          buf_len - bytes_written,
+			                          "/%s", file);
 		}
 	} else {
 		bytes_written += (!strcmp(file, dev_file_name)
-				  || !user->device_id)
-			? snprintf(buffer+bytes_written, buf_len-bytes_written,
-				   "/%s/%s", "contacts", user->name)
-			: snprintf(buffer+bytes_written, buf_len-bytes_written,
-				   "/%s/%s/%d", "contacts", user->name,
-				   user->device_id)
-			;
+		                  || !user->device_id)
+		                 ? snprintf(buffer + bytes_written, buf_len - bytes_written,
+		                            "/%s/%s", "contacts", user->name)
+		                 : snprintf(buffer + bytes_written, buf_len - bytes_written,
+		                            "/%s/%s/%d", "contacts", user->name,
+		                            user->device_id)
+		                 ;
 
 		if (file) {
 			bytes_written += snprintf(buffer + bytes_written,
-						  buf_len - bytes_written,
-						  "/%s", file);
+			                          buf_len - bytes_written,
+			                          "/%s", file);
 		}
 	}
 
@@ -305,7 +305,7 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 	if (stat(buffer, &st) < 0) {
 		return 1;
 	}
-	
+
 	return 0;
 }
 
@@ -316,7 +316,7 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
  * @retval -1	An error occurred while removing the node
  */
 int omemo_delete_cb(const char *fpath, const struct stat *sb, int typeflag,
-		    struct FTW *ftwbuf)
+                    struct FTW *ftwbuf)
 {
 	if (remove(fpath))
 		return -1;
@@ -328,7 +328,7 @@ int omemo_delete_cb(const char *fpath, const struct stat *sb, int typeflag,
  * @brief Deletes a directory recursively
  *
  * @param path	The path to delete
- * 
+ *
  * @retval 0	The directory was removed successfully
  * @retval -1	An error occurred while removing the directory
  */
@@ -339,17 +339,17 @@ int omemo_rm_dir(const char *path)
 
 
 int omemo_store_device_list(const signal_protocol_address *user,
-			    struct device_list *list)
+                            struct device_list *list)
 {
 	char path[PATH_MAX];
 	FILE *devices;
 	int retval;
 	size_t devices_written = 0;
 	struct device_list *cur;
-	
+
 	retval = omemo_get_dir(user, &(list->device->address), dev_file_name,
-			       path, sizeof(path));
-	
+	                       path, sizeof(path));
+
 	puts(path);
 	if (retval < 0) {
 		return -1;
@@ -383,7 +383,7 @@ int omemo_store_device_list(const signal_protocol_address *user,
 	if (fputs("\nI:", devices) == EOF) {
 		return -1;
 	}
-	
+
 	devices_written = 0;
 	for (cur = list; cur != NULL; cur = cur->next) {
 		if (cur->device->status == INACTIVE) {
@@ -421,7 +421,7 @@ int omemo_is_local_user_existent(const signal_protocol_address *address)
 
 
 int omemo_load_session(signal_buffer **record, signal_buffer **user_record,
-		       const signal_protocol_address *address, void *user_data)
+                       const signal_protocol_address *address, void *user_data)
 {
 	if (!address || !user_data) {
 		return SG_ERR_INVAL;
@@ -436,7 +436,7 @@ int omemo_load_session(signal_buffer **record, signal_buffer **user_record,
 
 
 	retval = omemo_get_dir(&context->own_address, address, se_file_name, path_buf,
-			       sizeof(path_buf));
+	                       sizeof(path_buf));
 
 	if (retval <= 0) {
 		return (retval == 0) ? retval : SG_ERR_UNKNOWN;
@@ -446,7 +446,7 @@ int omemo_load_session(signal_buffer **record, signal_buffer **user_record,
 	if (!se_file) {
 		return SG_ERR_UNKNOWN;
 	}
-	
+
 	/* Determine size of file */
 	if (fstat(fileno(se_file), &st)) {
 		fclose(se_file);
@@ -480,7 +480,7 @@ err_cleanup:
 
 
 int omemo_get_sub_device_sessions(signal_int_list **sessions, const char *name,
-				  size_t name_len, void *user_data)
+                                  size_t name_len, void *user_data)
 {
 	char buffer[PATH_MAX];
 	DIR *dir;
@@ -497,9 +497,9 @@ int omemo_get_sub_device_sessions(signal_int_list **sessions, const char *name,
 
 	if (!name || !user_data)
 		return SG_ERR_INVAL;
-	
+
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_dir(&context->own_address, &user_addr, NULL, buffer, sizeof(buffer));
 	if (retval < 0) {
 		return SG_ERR_UNKNOWN;
@@ -508,11 +508,11 @@ int omemo_get_sub_device_sessions(signal_int_list **sessions, const char *name,
 	}
 
 	dir = opendir(buffer);
-	if (!dir) 
+	if (!dir)
 		return SG_ERR_UNKNOWN;
-	
+
 	*sessions = signal_int_list_alloc();
-	if (!*sessions) 
+	if (!*sessions)
 		return SG_ERR_UNKNOWN;
 
 	while ((folder = readdir(dir))) {
@@ -520,14 +520,14 @@ int omemo_get_sub_device_sessions(signal_int_list **sessions, const char *name,
 		signal_int_list_push_back(*sessions, device_id);
 		++size;
 	}
-	
+
 	closedir(dir);
 	return size;
 }
 
 int omemo_store_session(const signal_protocol_address *address, uint8_t *record,
-			size_t record_len, uint8_t *user_record, size_t user_record_len,
-			void *user_data)
+                        size_t record_len, uint8_t *user_record, size_t user_record_len,
+                        void *user_data)
 {
 	char buffer[PATH_MAX];
 	FILE *se_file;
@@ -537,14 +537,14 @@ int omemo_store_session(const signal_protocol_address *address, uint8_t *record,
 
 	if (!address || !record || !user_data)
 		return SG_ERR_INVAL;
-	
+
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_dir(&context->own_address, address, se_file_name, buffer,
-			       sizeof(buffer));
-	if (retval < 0) 
+	                       sizeof(buffer));
+	if (retval < 0)
 		return SG_ERR_UNKNOWN;
-	
+
 	se_file = fopen(buffer, "w");
 	if (!se_file)
 		return SG_ERR_UNKNOWN;
@@ -560,12 +560,12 @@ int omemo_store_session(const signal_protocol_address *address, uint8_t *record,
 }
 
 int omemo_contains_session(const signal_protocol_address *address,
-			   void *user_data)
+                           void *user_data)
 {
 	char buffer[PATH_MAX];
 	int retval;
 	struct omemo_context *context = user_data;
-	
+
 	if (!address || !user_data)
 		return SG_ERR_INVAL;
 
@@ -575,17 +575,17 @@ int omemo_contains_session(const signal_protocol_address *address,
 }
 
 int omemo_delete_session(const signal_protocol_address *address,
-			 void *user_data)
+                         void *user_data)
 {
 	char buffer[PATH_MAX];
 	int retval;
 	struct omemo_context *context = user_data;
-	
+
 	if (!address || !user_data)
 		return SG_ERR_INVAL;
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_dir(&context->own_address, address, NULL, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -596,7 +596,7 @@ int omemo_delete_session(const signal_protocol_address *address,
 }
 
 int omemo_delete_all_sessions(const char *name, size_t name_len,
-			      void *user_data)
+                              void *user_data)
 {
 	char buffer[PATH_MAX];
 	DIR *dir;
@@ -616,7 +616,7 @@ int omemo_delete_all_sessions(const char *name, size_t name_len,
 	}
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_dir(&context->own_address, &user_addr, NULL, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -629,7 +629,7 @@ int omemo_delete_all_sessions(const char *name, size_t name_len,
 
 	while ((folder = readdir(dir)))
 		++se_deleted;
-	
+
 	retval = omemo_rm_dir(buffer);
 	if (retval < 0)
 		return retval;
@@ -641,7 +641,7 @@ void omemo_session_store_destroy(void *user_data)
 { }
 
 int omemo_load_pre_key(signal_buffer **record, uint32_t pre_key_id,
-		       void *user_data)
+                       void *user_data)
 {
 	char path_buf[PATH_MAX];
 	FILE *pk_file;
@@ -656,11 +656,11 @@ int omemo_load_pre_key(signal_buffer **record, uint32_t pre_key_id,
 
 	memset(path_buf, 0x0, sizeof(path_buf));
 	memset(&st, 0x0, sizeof(struct stat));
-	
+
 	retval = omemo_get_pre_key_store(&context->own_address, path_buf, sizeof(path_buf));
 	if (retval)
 		return SG_ERR_INVALID_KEY_ID;
-	
+
 	pk_file = fopen(path_buf, "r");
 	if (!pk_file)
 		return SG_ERR_INVALID_KEY_ID;
@@ -687,16 +687,16 @@ int omemo_load_pre_key(signal_buffer **record, uint32_t pre_key_id,
 	fclose(pk_file);
 	free(buffer);
 	return SG_SUCCESS;
-	
+
 err_cleanup:
-	
+
 	fclose(pk_file);
 	free(buffer);
 	return SG_ERR_INVALID_KEY_ID;
 }
 
 int omemo_store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
-			void *user_data)
+                        void *user_data)
 {
 	char buffer[PATH_MAX];
 	FILE *pk_file;
@@ -708,7 +708,7 @@ int omemo_store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
 		return SG_ERR_INVAL;
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -717,7 +717,7 @@ int omemo_store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
 		if (retval < 0)
 			return SG_ERR_UNKNOWN;
 	}
-	
+
 	bytes_free = sizeof(buffer) - strlen(buffer);
 	if (snprintf(buffer, bytes_free, "%d", pre_key_id) >= bytes_free)
 		return SG_ERR_UNKNOWN;
@@ -749,7 +749,7 @@ int omemo_contains_pre_key(uint32_t pre_key_id, void *user_data)
 	}
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -776,7 +776,7 @@ int omemo_remove_pre_key(uint32_t pre_key_id, void *user_data)
 	}
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval)
 		return SG_ERR_UNKNOWN;
@@ -800,7 +800,7 @@ void omemo_pre_key_store_destroy(void *user_data)
 
 
 int omemo_load_signed_pre_key(signal_buffer **record,
-			      uint32_t signed_pre_key_id, void *user_data)
+                              uint32_t signed_pre_key_id, void *user_data)
 {
 	char path_buf[PATH_MAX];
 	FILE *pk_file;
@@ -808,19 +808,19 @@ int omemo_load_signed_pre_key(signal_buffer **record,
 	struct stat st;
 	uint8_t *buffer;
 	struct omemo_context *context = user_data;
-	
+
 	if (!user_data) {
 		return SG_ERR_INVAL;
 	}
 
 	memset(path_buf, 0x0, sizeof(path_buf));
 	memset(&st, 0x0, sizeof(struct stat));
-	
+
 	retval = omemo_get_signed_pre_key_store(&context->own_address, path_buf,
-						sizeof(path_buf));
+	                                        sizeof(path_buf));
 	if (retval)
 		return SG_ERR_INVALID_KEY_ID;
-	
+
 	pk_file = fopen(path_buf, "r");
 	if (!pk_file)
 		return SG_ERR_INVALID_KEY_ID;
@@ -847,16 +847,16 @@ int omemo_load_signed_pre_key(signal_buffer **record,
 	fclose(pk_file);
 	free(buffer);
 	return SG_SUCCESS;
-	
+
 err_cleanup:
-	
+
 	fclose(pk_file);
 	free(buffer);
 	return SG_ERR_INVALID_KEY_ID;
 }
 
 int omemo_store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
-			       size_t record_len, void *user_data)
+                               size_t record_len, void *user_data)
 {
 	char buffer[PATH_MAX];
 	FILE *pk_file;
@@ -868,7 +868,7 @@ int omemo_store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
 		return SG_ERR_INVAL;
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_signed_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -877,7 +877,7 @@ int omemo_store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
 		if (retval < 0)
 			return SG_ERR_UNKNOWN;
 	}
-	
+
 	bytes_free = sizeof(buffer) - strlen(buffer);
 	if (snprintf(buffer, bytes_free, "%d", signed_pre_key_id)
 	    >= bytes_free)
@@ -910,7 +910,7 @@ int omemo_contains_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 	}
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_signed_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval < 0)
 		return SG_ERR_UNKNOWN;
@@ -932,13 +932,13 @@ int omemo_remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 	size_t bytes_free;
 	struct stat st = {0};
 	struct omemo_context *context = user_data;
-	
+
 	if (!user_data) {
 		return SG_ERR_INVAL;
 	}
 
 	memset(buffer, 0x0, sizeof(buffer));
-	
+
 	retval = omemo_get_signed_pre_key_store(&context->own_address, buffer, sizeof(buffer));
 	if (retval)
 		return SG_ERR_UNKNOWN;
@@ -963,7 +963,7 @@ void omemo_signed_pre_key_store_destroy(void *user_data)
 
 
 int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **private_data,
-				void *user_data)
+                                void *user_data)
 {
 	char buffer[PATH_MAX];
 	FILE *priv_key_file;
@@ -988,7 +988,7 @@ int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **pri
 
 	path_len = strlen(buffer);
 	bytes_free = sizeof(buffer) - path_len;
-	
+
 	/* Load private key */
 	if (snprintf(buffer + path_len, bytes_free, "%s", id_priv_key_file_name)
 	    >= bytes_free) {
@@ -1023,7 +1023,7 @@ int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **pri
 		free(priv_key_buffer);
 		return SG_ERR_UNKNOWN;
 	}
-	
+
 	fclose(priv_key_file);
 
 	/* Load public key */
@@ -1031,7 +1031,7 @@ int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **pri
 	    >= bytes_free) {
 		return SG_ERR_UNKNOWN;
 	}
-	
+
 	pub_key_file = fopen(buffer, "r");
 	if (!pub_key_file) {
 		return SG_ERR_INVALID_KEY_ID;
@@ -1060,9 +1060,9 @@ int omemo_get_identity_key_pair(signal_buffer **public_data, signal_buffer **pri
 		free(pub_key_buffer);
 		return SG_ERR_UNKNOWN;
 	}
-	
+
 	fclose(pub_key_file);
-	
+
 	return SG_SUCCESS;
 }
 
@@ -1079,7 +1079,7 @@ int omemo_get_local_registration_id(void *user_data, uint32_t *registration_id)
 }
 
 int omemo_save_identity(const signal_protocol_address *address, uint8_t *key_data,
-			size_t key_len, void *user_data)
+                        size_t key_len, void *user_data)
 {
 	/* Not needed as OMEMO handles device management */
 
@@ -1087,7 +1087,7 @@ int omemo_save_identity(const signal_protocol_address *address, uint8_t *key_dat
 }
 
 int omemo_is_trusted_identity(const signal_protocol_address *address, uint8_t *key_data,
-			      size_t key_len, void *user_data)
+                              size_t key_len, void *user_data)
 {
 	/* Trust management is done by OMEMO */
 	return 1;
