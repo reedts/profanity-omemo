@@ -719,7 +719,7 @@ int omemo_store_pre_key(uint32_t pre_key_id, uint8_t *record, size_t record_len,
 	}
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", pre_key_id) >= bytes_free)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", pre_key_id) >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
 	pk_file = fopen(buffer, "w");
@@ -757,7 +757,7 @@ int omemo_contains_pre_key(uint32_t pre_key_id, void *user_data)
 		return 0;
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", pre_key_id) >= bytes_free)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", pre_key_id) >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
 	return (stat(buffer, &st) < 0) ? 0 : 1;
@@ -782,7 +782,7 @@ int omemo_remove_pre_key(uint32_t pre_key_id, void *user_data)
 		return SG_ERR_UNKNOWN;
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", pre_key_id) >= bytes_free)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", pre_key_id) >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
 	if (stat(buffer, &st) < 0)
@@ -879,7 +879,7 @@ int omemo_store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t *record,
 	}
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", signed_pre_key_id)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", signed_pre_key_id)
 	    >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
@@ -918,7 +918,7 @@ int omemo_contains_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 		return 0;
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", signed_pre_key_id)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", signed_pre_key_id)
 	    >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
@@ -944,7 +944,7 @@ int omemo_remove_signed_pre_key(uint32_t signed_pre_key_id, void *user_data)
 		return SG_ERR_UNKNOWN;
 
 	bytes_free = sizeof(buffer) - strlen(buffer);
-	if (snprintf(buffer, bytes_free, "%d", signed_pre_key_id)
+	if (snprintf(buffer + strlen(buffer), bytes_free, "%d", signed_pre_key_id)
 	    >= bytes_free)
 		return SG_ERR_UNKNOWN;
 
