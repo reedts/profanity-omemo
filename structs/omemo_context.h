@@ -21,8 +21,6 @@ struct omemo_context {
 };
 
 struct omemo_context_global {
-	omemo_msg_displayer msg_displayer;
-	omemo_stanza_sender stanza_sender;
 	omemo_logger logger;
 
 	// TODO: This will be a hash table
