@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <omemo/omemo.h>
+#include <string.h>
 #include <profapi.h>
 
 void omemo_logger_profanity(omemo_log_level lvl, const char *message)
@@ -24,11 +25,6 @@ void omemo_logger_profanity(omemo_log_level lvl, const char *message)
 	}
 }
 
-void omemo_msg_displayer_profanity(char *receiver, char *msg)
-{
-	prof_chat_show(receiver, msg);
-}
-
 void prof_init(const char *const version,
                const char *const status,
                const char *const account_name,
@@ -39,18 +35,17 @@ void prof_init(const char *const version,
 
 	omemo_init();
 	omemo_set_logger(omemo_logger_profanity);
-	omemo_set_msg_displayer(omemo_msg_displayer_profanity);
 }
 
-char *prof_pre_chat_message_send(const char *const barejid, const char *message)
+char *prof_on_message_stanza_send(const char *const stanza)
 {
-	char *receiver = prof_get_current_recipient();
-	omemo_send_encrypted(barejid, receiver, message);
-	return NULL;
+	return omemo_send_encrypted(stanza);
 }
 
-char *prof_pre_room_message_display(const char *const barejid, const char *const nick, const char *message)
+int prof_on_message_stanza_receive(const char *const stanza)
 {
-	char *sender = prof_get_current_recipient();
-	return omemo_receive_encrypted(barejid, sender, message);
+	char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
+	char *message = omemo_receive_encrypted(stanza);
+	prof_chat_show(sender, message);
+	return 0;
 }
