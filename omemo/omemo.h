@@ -8,6 +8,15 @@
 #include <structs/omemo_context.h>
 
 /**
+ * Installation routine for the plugin.
+ * This is only called one single time, when a local account adds OMEMO support.
+ * It generates the needed keys and saves them.
+ *
+ * @param context The context of the local user to install the plugin
+ */
+void omemo_install(struct omemo_context *context);
+
+/**
  * Called only once to initialize internal states, typically when the plugin is loaded.
  */
 void omemo_hook_init();

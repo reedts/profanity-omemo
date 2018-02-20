@@ -1,3 +1,4 @@
-set (PROF_OMEMO_SRC
+set (OMEMO_SRC
+	omemo/install.c
         omemo/omemo.c
 )
