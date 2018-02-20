@@ -45,7 +45,7 @@ char *omemo_send_encrypted(const char *barejid, const char *receiver_jid, const 
  * @param ciphertext_stanza Message to be decrypted
  * @return The decrypted message, ready to be displayed to the user.
  */
-char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *ciphertext_stanza);
+char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *stanza);
 
 /**
  * Called when the client is shutting down
