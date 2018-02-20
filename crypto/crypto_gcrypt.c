@@ -147,7 +147,7 @@ int omemo_sha512_digest_init(void **digest_context, void *user_data)
 	}
 
 	err = gcry_md_open(hd, GCRY_MD_SHA512, 0);
-	if (err < 0) {
+	if (err != 0) {
 		return SG_ERR_UNKNOWN;
 	}
 
