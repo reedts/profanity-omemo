@@ -5,16 +5,16 @@
 #ifndef PROFANITY_OMEMO_MAIN_H
 #define PROFANITY_OMEMO_MAIN_H
 
-#include <structs/omemo_context.h>
+#include <omemo/omemo_types.h>
 
 /**
  * Installation routine for the plugin.
  * This is only called one single time, when a local account adds OMEMO support.
  * It generates the needed keys and saves them.
  *
- * @param context The context of the local user to install the plugin
+ * @param ctx The context of the local user to install the plugin
  */
-int omemo_install(struct omemo_context *context);
+int omemo_install();
 
 /**
  * Called only once to initialize internal states, typically when the plugin is loaded.

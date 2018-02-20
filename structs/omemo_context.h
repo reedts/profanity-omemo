@@ -3,23 +3,12 @@
 
 #include <pthread.h>
 #include <signal_protocol_types.h>
+#include <omemo/omemo_types.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef enum {
-	OMEMO_LOGLVL_DEBUG = 0,
-	OMEMO_LOGLVL_INFO,
-	OMEMO_LOGLVL_WARNING,
-	OMEMO_LOGLVL_ERROR
-} omemo_log_level;
-
-typedef void (* omemo_msg_displayer)(char *receiver, char *msg);
-
-typedef void (* omemo_stanza_sender)(char *stanza);
-
-typedef void (* omemo_logger)(omemo_log_level lvl, const char *message);
 
 struct omemo_context {
 	signal_protocol_address own_address;

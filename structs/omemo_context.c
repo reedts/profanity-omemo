@@ -3,7 +3,7 @@
 #include <signal_protocol.h>
 #include <crypto/crypto_provider.h>
 #include <store/omemo_store.h>
-#include <omemo/omemo.h>
+#include <structs/omemo_context.h>
 
 #define UNUSED(x) (void)(x)
 
