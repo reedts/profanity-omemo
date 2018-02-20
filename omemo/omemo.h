@@ -14,12 +14,12 @@
  *
  * @param context The context of the local user to install the plugin
  */
-void omemo_install(struct omemo_context *context);
+int omemo_install(struct omemo_context *context);
 
 /**
  * Called only once to initialize internal states, typically when the plugin is loaded.
  */
-void omemo_hook_init();
+void omemo_hook_init(void);
 
 /**
  * Registers the given JID into the plugin structures.
@@ -50,7 +50,7 @@ char *omemo_hook_decrypt(const char *barejid, const char *sender_jid, const char
 /**
  * Called when the client is shutting down
  */
-void omemo_hook_shutdown();
+void omemo_hook_shutdown(void);
 
 /**
  * Sets the message shower, a function capable of displaying a message in the chat window.
