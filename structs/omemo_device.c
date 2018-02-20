@@ -1,8 +1,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "omemo_device.h"
+#include <structs/omemo_device.h>
 
 struct omemo_device *omemo_device_create(const char *jid, int32_t id)
 {

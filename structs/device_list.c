@@ -1,10 +1,9 @@
 #include <errno.h>
 #include <libxml/tree.h>
 #include <stdlib.h>
-#include <xmpp/omemo_constants.h>
-
-#include "device_list.h"
-#include "omemo_device.h"
+#include <omemo/omemo_constants.h>
+#include <structs/device_list.h>
+#include <structs/omemo_device.h>
 
 
 

@@ -1,10 +1,9 @@
 #include <errno.h>
+#include <omemo/omemo_constants.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <structs/device_list.h>
-#include <xmpp/omemo_constants.h>
-
-#include "pubsub.h"
+#include <xmpp/pubsub.h>
 
 int omemo_publish_device_list(const char *jid, struct device_list **list)
 {
