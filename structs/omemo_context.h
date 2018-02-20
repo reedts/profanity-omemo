@@ -9,7 +9,6 @@
 extern "C" {
 #endif
 
-
 struct omemo_context {
 	signal_protocol_address own_address;
 	signal_context *signal_ctx;
@@ -18,14 +17,21 @@ struct omemo_context {
 	struct omemo_store_context *store_context;
 	struct omemo_bundle *bundle;
 
+	pthread_mutex_t mutex;
+};
+
+struct omemo_context_global {
 	omemo_msg_displayer msg_displayer;
 	omemo_stanza_sender stanza_sender;
 	omemo_logger logger;
 
-	pthread_mutex_t mutex;
+	// TODO: This will be a hash table
+	struct omemo_context **omemo_user_contexts;
 };
 
 struct omemo_context *omemo_context_create(const signal_protocol_address *own_address);
+
+int omemo_context_install(struct omemo_context *ctx);
 
 void omemo_context_free(struct omemo_context *context);
 

@@ -8,26 +8,17 @@
 #include <omemo/omemo_types.h>
 
 /**
- * Installation routine for the plugin.
- * This is only called one single time, when a local account adds OMEMO support.
- * It generates the needed keys and saves them.
- *
- * @param ctx The context of the local user to install the plugin
- */
-int omemo_install();
-
-/**
  * Called only once to initialize internal states, typically when the plugin is loaded.
  */
 void omemo_init(void);
 
 /**
- * Registers the given JID into the plugin structures.
- * This allows later calls to encrypt, decrypt, subscribe etc related to this account
+ * Initializes the account identified by the given JID. Key material and sessions will be loeaded from disk if possible,
+ * newly created otherwise.
  *
- * @param barejid The JID of the account to be registered
+ * @param barejid JID of the user to initialize the context for
  */
-void omemo_init_account(const char *barejid);
+int omemo_init_account(const char *barejid);
 
 /**
  * Encrypts the given stanza.
