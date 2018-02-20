@@ -40,3 +40,6 @@ ext/*
 
 # VIM workspace
 *.swp
+
+# CLion stuff
+.idea
