@@ -4,12 +4,13 @@
 
 #include <signal_protocol.h>
 #include <errno.h>
-#include <stdio.h>
 #include <sys/time.h>
 #include <key_helper.h>
 #include <omemo/omemo.h>
 #include <omemo/omemo_constants.h>
 #include <structs/omemo_context.h>
+#include <xmpp/omemo_stanza.h>
+#include <string.h>
 
 struct omemo_context ctx;
 
@@ -105,10 +106,17 @@ char *omemo_send_encrypted(const char *barejid, const char *receiver_jid, const 
 	return NULL;
 }
 
-char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *ciphertext_stanza)
+char *omemo_receive_encrypted(const char *barejid, const char *sender_jid, const char *stanza)
 {
-	// TODO: Actual encryption
-//    ctx.logger(OMEMO_LOGLVL_DEBUG, "Decrypting message");
+	if (omemo_check_stanza_type(stanza) != OMEMO_STYPE_NONE) {
+		// This is an OMEMO stanza, process it
+		// TODO: Actual encryption
+		// ctx.logger(OMEMO_LOGLVL_DEBUG, "Decrypting message");
+	} else {
+		// Return a copy of it
+		return strcpy(malloc(sizeof(stanza)), stanza);
+	}
+
 	return NULL;
 }
 
