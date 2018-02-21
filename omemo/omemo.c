@@ -2,12 +2,12 @@
 // Created by roobre on 2/18/18.
 //
 
+#include <string.h>
 #include <signal_protocol.h>
 #include <omemo/omemo.h>
 #include <omemo/omemo_constants.h>
 #include <structs/omemo_context.h>
 #include <xmpp/omemo_stanza.h>
-#include <string.h>
 
 struct omemo_context_global ctx;
 
@@ -29,12 +29,16 @@ int omemo_init_account(const char *barejid)
 	return 0;
 }
 
+int omemo_is_stanza(const char *stanza)
+{
+	return omemo_check_stanza_type(stanza) != 0;
+}
+
 char *omemo_send_encrypted(const char *msg_stanza)
 {
 	// TODO: Actual encryption
-	//    ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
+	ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
 	// Display original message
-	//    ctx.msg_displayer(receiver_jid, msg_stanza);
 
 	// TODO: Compose a proper OMEMO msg_stanza
 	return NULL;

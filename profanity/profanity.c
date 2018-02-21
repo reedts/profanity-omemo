@@ -95,8 +95,14 @@ char *prof_on_message_stanza_send(const char *const stanza)
 
 int prof_on_message_stanza_receive(const char *const stanza)
 {
-	char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
-	char *message = omemo_receive_encrypted(stanza);
-	prof_chat_show(sender, message);
-	return 0;
+	if (omemo_is_stanza(stanza)) {
+		char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
+		char *message = omemo_receive_encrypted(stanza);
+		prof_chat_show(sender, message);
+		// Stanza processed, tell profanity to discard it.
+		return 0;
+	} else {
+		// We're not interested on this, tell profanity to keep scanning it.
+		return 1;
+	}
 }
