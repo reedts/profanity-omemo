@@ -67,7 +67,8 @@ void prof_init(const char *const version,
 		"/" CMD_NAME " register roobre@roobre.es",
 		"/" CMD_NAME " start reedts@trashserver.net",
 		"/" CMD_NAME " stop",
-		"/" CMD_NAME " trust 03B26626[3C571553[...]]",
+		"/" CMD_NAME " trust 03B",
+		"/" CMD_NAME " untrust 03B26626",
 		NULL
 	};
 
