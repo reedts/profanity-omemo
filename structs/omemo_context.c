@@ -40,6 +40,8 @@ struct omemo_context *omemo_context_create(const signal_protocol_address *own_ad
 		return NULL;
 	}
 
+	// TODO: Free context on error
+
 	memcpy(&context->own_address, own_address, sizeof(signal_protocol_address));
 	context->store_context = omemo_store_context_create(context);
 	if (!context->store_context) {
