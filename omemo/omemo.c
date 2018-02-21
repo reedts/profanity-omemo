@@ -13,7 +13,7 @@ struct omemo_context_global ctx;
 
 void omemo_init(void)
 {
-	ctx.omemo_user_contexts = calloc(sizeof(struct omemo_context *), 1);
+	ctx.omemo_user_contexts = calloc(1, sizeof(struct omemo_context *));
 	// TODO: Initialize stuff
 }
 

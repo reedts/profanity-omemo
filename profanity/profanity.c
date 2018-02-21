@@ -3,6 +3,7 @@
 //
 
 #include <stdlib.h>
+#include <omemo/omemo.h>
 #include <string.h>
 #include <profapi.h>
 #include <omemo/omemo.h>
