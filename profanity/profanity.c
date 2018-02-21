@@ -13,8 +13,7 @@ const char *const LOG_PREFIX = "[OMEMO] ";
 
 void omemo_logger_profanity(omemo_log_level lvl, const char *message)
 {
-	char *prefixedmsg = malloc(strlen(LOG_PREFIX) + strlen(message) + 1);
-	strcpy(prefixedmsg, LOG_PREFIX);
+	char *prefixedmsg = strcpy(malloc(strlen(LOG_PREFIX) + strlen(message) + 1), LOG_PREFIX);
 	strcat(prefixedmsg, message);
 
 	switch (lvl) {
@@ -47,6 +46,15 @@ void omemo_cmd(char **args)
 
 	} else {
 		prof_cons_show(CMD_NAME ": Unknown command");
+	}
+}
+
+const char *jid_trim(char *fulljid)
+{
+	if (strchr(fulljid, '/') == NULL) {
+		return fulljid;
+	} else {
+		return strtok(fulljid, "/");
 	}
 }
 
@@ -102,16 +110,18 @@ void prof_init(const char *const version,
 
 	omemo_init();
 	if (fulljid != NULL) {
-		// TODO: Trim fulljid
-		omemo_init_account(fulljid);
+		char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
+		omemo_init_account(jid_trim(jid));
+		free(jid);
 	}
 }
 
 void prof_on_connect(const char *const account_name,
                      const char *const fulljid)
 {
-	// TODO: Trim fulljid
-	omemo_init_account(fulljid);
+	char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
+	omemo_init_account(jid_trim(jid));
+	free(jid);
 }
 
 char *prof_on_message_stanza_send(const char *const stanza)
