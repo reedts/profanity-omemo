@@ -14,7 +14,7 @@ void omemo_init(void);
 
 /**
  * Initializes the account identified by the given JID. Key material and sessions will be loeaded from disk if possible,
- * newly created otherwise.
+ * newly created otherwise. This is safe to be called repeatedly.
  *
  * @param barejid JID of the user to initialize the context for
  */

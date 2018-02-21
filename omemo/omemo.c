@@ -14,6 +14,7 @@ struct omemo_context_global ctx;
 void omemo_init(void)
 {
 	ctx.omemo_user_contexts = calloc(1, sizeof(struct omemo_context *));
+	ctx.logger(OMEMO_LOGLVL_INFO, "Global context initialized.");
 	// TODO: Initialize stuff
 }
 
@@ -25,6 +26,11 @@ int omemo_init_account(const char *barejid)
 	addr.device_id = 0; // TODO
 
 	ctx.omemo_user_contexts[0] = omemo_context_create(&addr);
+
+	char *str = malloc(64);
+	sprintf(str, "Context registered for account %s", barejid);
+	ctx.logger(OMEMO_LOGLVL_INFO, str);
+	free(str);
 
 	return 0;
 }

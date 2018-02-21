@@ -2,36 +2,51 @@
 // Created by roobre on 2/18/18.
 //
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <omemo/omemo.h>
 #include <string.h>
 #include <profapi.h>
 
 #define CMD_NAME "omemo"
+const char *const LOG_PREFIX = "[OMEMO] ";
 
 void omemo_logger_profanity(omemo_log_level lvl, const char *message)
 {
+	char *prefixedmsg = malloc(strlen(LOG_PREFIX) + strlen(message) + 1);
+	strcpy(prefixedmsg, LOG_PREFIX);
+	strcat(prefixedmsg, message);
+
 	switch (lvl) {
 	case OMEMO_LOGLVL_DEBUG:
-		prof_log_debug(message);
+		prof_log_debug(prefixedmsg);
 		break;
 	case OMEMO_LOGLVL_INFO:
-		prof_log_debug(message);
+		prof_log_info(prefixedmsg);
 		break;
 	case OMEMO_LOGLVL_WARNING:
-		prof_log_debug(message);
+		prof_log_warning(prefixedmsg);
 		break;
 	case OMEMO_LOGLVL_ERROR:
-		prof_log_debug(message);
+		prof_log_error(prefixedmsg);
 		break;
 	}
+
+	free(prefixedmsg);
 }
 
 void omemo_cmd(char **args)
 {
-	prof_log_info("[OMEMO] command called");
-	if (args[0] != NULL && strcmp(args[0], "help") == 0) {
+	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "/" CMD_NAME " command called.");
+
+	// Profanity API guarantees this won't be called for less than 1 argument
+	if (strcmp(args[0], "help") == 0) {
+		// Undocumented but probably useful for someone
 		prof_send_line("/help omemo");
+	} else if (strcmp(args[0], "register") == 0) {
+
+	} else {
+		prof_cons_show(CMD_NAME ": Unknown command");
 	}
 }
 
@@ -41,7 +56,7 @@ void prof_init(const char *const version,
                const char *const fulljid
               )
 {
-	prof_log_info("[OMEMO] Loading plugin.");
+	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Loading plugin.");
 
 	char *synopsis[] = {
 		"/" CMD_NAME " register <account>",
@@ -54,12 +69,12 @@ void prof_init(const char *const version,
 	};
 
 	char *arguments[][2] = {
-		{"register", "Generates keys and settings for the given account."},
-		{"start", "Enables omemo encryption for the given JID, or the current conversation."},
-		{"stop", "Disables omemo encryption for the current conversation."},
+		{"register",  "Generates keys and settings for the given account."},
+		{"start",     "Enables omemo encryption for the given JID, or the current conversation."},
+		{"stop",      "Disables omemo encryption for the current conversation."},
 		{"list-keys", "List known omemo keys, along with its trust status."},
-		{"trust", "Marks the specified key as trusted. Key is automatically using the first chars if not ambiguous."},
-		{"untrust", "Marks the specified key as untrusted."},
+		{"trust",     "Marks the specified key as trusted. Key is automatically using the first chars if not ambiguous."},
+		{"untrust",   "Marks the specified key as untrusted."},
 		{NULL, NULL}
 	};
 
@@ -72,20 +87,31 @@ void prof_init(const char *const version,
 		NULL
 	};
 
-	prof_log_info("[OMEMO] Registering commands");
 
-	prof_register_command("/" CMD_NAME, 1, 2, synopsis,
+	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Registering commands");
+
+	prof_register_command("/"
+	                      CMD_NAME, 1, 2, synopsis,
 	                      "Changes OMEMO settings and starts OMEMO sessions", arguments, examples,
 	                      omemo_cmd
 	                     );
 
-	prof_log_info("[OMEMO] Registering loggers,");
+	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Registering loggers.");
 
 	omemo_set_logger(omemo_logger_profanity);
+
 	omemo_init();
 	if (fulljid != NULL) {
+		// TODO: Trim fulljid
 		omemo_init_account(fulljid);
 	}
+}
+
+void prof_on_connect(const char *const account_name,
+                     const char *const fulljid)
+{
+	// TODO: Trim fulljid
+	omemo_init_account(fulljid);
 }
 
 char *prof_on_message_stanza_send(const char *const stanza)
