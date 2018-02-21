@@ -2,6 +2,7 @@
 // Created by roobre on 2/18/18.
 //
 
+#include <stdlib.h>
 #include <omemo/omemo.h>
 #include <profapi.h>
 
