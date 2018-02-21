@@ -21,7 +21,7 @@ struct omemo_bundle *omemo_bundle_create_own(struct omemo_context *context)
 		errno = ENOMEM;
 		return NULL;
 	}
-	
+
 	/* Load public key of identity key pair */
 	retval = context->store_context->identity_key_store.get_identity_key_pair(&pub_key_buf, &priv_key_buf, context);
 	if (retval < 0) {
@@ -31,7 +31,7 @@ struct omemo_bundle *omemo_bundle_create_own(struct omemo_context *context)
 	curve_decode_point(&bundle->pub_key, signal_buffer_data(pub_key_buf), signal_buffer_len(pub_key_buf), context->signal_ctx);
 	signal_buffer_free(pub_key_buf);
 	signal_buffer_bzero_free(priv_key_buf);
-	
+
 	/* Load signed pre key */
 	/* TODO: Value of signed_pre_key id?? */
 	bundle->signed_pre_key_id = 0;
@@ -39,24 +39,24 @@ struct omemo_bundle *omemo_bundle_create_own(struct omemo_context *context)
 	if (retval < 0) {
 		return NULL;
 	}
-	
+
 	/* Deserialise signed pre key pair from buffer */
 	session_signed_pre_key_deserialize(&sig_pre_key, signal_buffer_data(sig_pre_key_buf),
-					   signal_buffer_len(sig_pre_key_buf), context->signal_ctx);
+	                                   signal_buffer_len(sig_pre_key_buf), context->signal_ctx);
 	signal_buffer_free(sig_pre_key_buf);
 	sig_pre_key_buf = NULL;
-	
+
 	/* Obtain signed public pre key */
 	ec_public_key_serialize(&sig_pre_key_buf,
-				ec_key_pair_get_public(session_signed_pre_key_get_key_pair(sig_pre_key)));
+	                        ec_key_pair_get_public(session_signed_pre_key_get_key_pair(sig_pre_key)));
 
 	curve_decode_point(&bundle->signed_pre_key, signal_buffer_data(sig_pre_key_buf), signal_buffer_len(sig_pre_key_buf),
-			   context->signal_ctx);
+	                   context->signal_ctx);
 	signal_buffer_free(sig_pre_key_buf);
-	
+
 	/* Set signed pre key signature */
 	bundle->signed_pre_key_signature = signal_buffer_create(session_signed_pre_key_get_signature(sig_pre_key),
-								session_signed_pre_key_get_signature_len(sig_pre_key));
+	                                   session_signed_pre_key_get_signature_len(sig_pre_key));
 	if (!bundle->signed_pre_key_signature) {
 		return NULL;
 	}

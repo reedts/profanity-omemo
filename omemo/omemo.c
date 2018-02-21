@@ -2,18 +2,19 @@
 // Created by roobre on 2/18/18.
 //
 
+#include <string.h>
 #include <signal_protocol.h>
 #include <omemo/omemo.h>
 #include <omemo/omemo_constants.h>
 #include <structs/omemo_context.h>
 #include <xmpp/omemo_stanza.h>
-#include <string.h>
 
 struct omemo_context_global ctx;
 
 void omemo_init(void)
 {
 	ctx.omemo_user_contexts = calloc(1, sizeof(struct omemo_context *));
+	ctx.logger(OMEMO_LOGLVL_INFO, "Global context initialized.");
 	// TODO: Initialize stuff
 }
 
@@ -22,19 +23,28 @@ int omemo_init_account(const char *barejid)
 	signal_protocol_address addr;
 	addr.name_len = strlen(barejid);
 	addr.name = strcpy(malloc(addr.name_len), barejid);
-	addr.device_id = 0; // TODO
+	addr.device_id = 0;
 
 	ctx.omemo_user_contexts[0] = omemo_context_create(&addr);
 
+	char *str = malloc(64);
+	sprintf(str, "Context registered for account %s", barejid);
+	ctx.logger(OMEMO_LOGLVL_INFO, str);
+	free(str);
+
 	return 0;
+}
+
+int omemo_is_stanza(const char *stanza)
+{
+	return omemo_check_stanza_type(stanza) != 0;
 }
 
 char *omemo_send_encrypted(const char *msg_stanza)
 {
 	// TODO: Actual encryption
-	//    ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
+	ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
 	// Display original message
-	//    ctx.msg_displayer(receiver_jid, msg_stanza);
 
 	// TODO: Compose a proper OMEMO msg_stanza
 	return NULL;

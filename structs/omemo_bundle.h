@@ -1,6 +1,6 @@
 //
 // Created by reedts on 2/21/18.
-// 
+//
 
 #ifndef PROF_OMEMO_BUNDLE_H
 #define PROF_OMEMO_BUNDLE_H
