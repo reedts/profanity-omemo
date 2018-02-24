@@ -13,7 +13,7 @@ TEST(pubsub, xml_output)
 	omemo_device_list_add(&list, device);
 	omemo_device_list_add(&list, inactive);
 
-	omemo_publish_device_list("test@test.test", &list);
+	omemo_publish_device_list_stanza("test@test.test", list);
 
 	omemo_device_list_free(&list);
 }

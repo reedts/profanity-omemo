@@ -1,13 +1,19 @@
+#if _POSIX_C_SOURCE <= 200809L || !defined( _POSIX_C_SOURCE )
+#define _POSIX_C_SOURCE 200809L
+#endif
+
 #include <errno.h>
 #include <omemo/omemo_constants.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <structs/device_list.h>
 #include <xmpp/pubsub.h>
 
-int omemo_publish_device_list(const char *jid, struct device_list **list)
+char *omemo_publish_device_list_stanza(const char *jid, const struct device_list *list)
 {
-	int buf_size = 0;
+	char *stanza;
+	int stanza_size;
 	xmlBufferPtr buf = NULL;
 	xmlNodePtr root, pubsub, publish, item;
 	xmlNsPtr pubsub_ns;
@@ -15,7 +21,7 @@ int omemo_publish_device_list(const char *jid, struct device_list **list)
 	pubsub_ns = xmlNewNs(NULL, BAD_CAST PUBSUB_PROTO_XML_NS, NULL);
 	if (!pubsub_ns) {
 		errno = EINVAL;
-		return -1;
+		return NULL;
 	}
 
 	root = xmlNewNode(NULL, BAD_CAST "iq");
@@ -23,39 +29,39 @@ int omemo_publish_device_list(const char *jid, struct device_list **list)
 	xmlNewProp(root, BAD_CAST "type", BAD_CAST "set"      );
 	xmlNewProp(root, BAD_CAST "id",   BAD_CAST "announce1");
 
-	pubsub = xmlNewNode(pubsub_ns, BAD_CAST "pubsub");
-	xmlAddChild(root, pubsub);
-
-	publish = xmlNewNode(NULL, BAD_CAST "publish");
+	pubsub = xmlNewChild(root, pubsub_ns, BAD_CAST "pubsub", NULL);
+	publish = xmlNewChild(pubsub, NULL, BAD_CAST "publish", NULL);
 	xmlNewProp(publish, BAD_CAST "node", BAD_CAST OMEMO_DEVICE_LIST_PUBLISH_XML_NODE);
-	xmlAddChild(pubsub, publish);
 
-	item = xmlNewNode(NULL, BAD_CAST "item");
-	xmlAddChild(publish, item);
+	item = xmlNewChild(publish, NULL, BAD_CAST "item", NULL);
 
 	if (omemo_device_list_serialize_xml(&item, list) < 0) {
-		return -1;
+		goto err_return;
 	}
 
 	/* Now Dump everything in the buffer and copy it into string to send */
 	buf = xmlBufferCreate();
-	buf_size = xmlNodeDump(buf, NULL, root, 0, 1);
-	if (buf_size < 0) {
+	stanza_size = xmlNodeDump(buf, NULL, root, 0, 1);
+	if (stanza_size < 0) {
 		errno = EIO;
-		return -1;
+		goto err_return;
 	}
-
-
-	/* Send the stanza here */
-	puts((char *)buf->content);
+	
+	stanza = strndup((char *) xmlBufferContent(buf), stanza_size);
 
 	xmlBufferFree(buf);
-	xmlFreeNode(root);
-	xmlFreeNs(pubsub_ns);
+	xmlFreeNodeList(root);
 
 	xmlCleanupParser();
 
-	return 0;
+	return stanza;
+
+err_return:
+	if (!buf) xmlBufferFree(buf);
+	xmlFreeNodeList(root);
+	xmlCleanupParser();
+
+	return NULL;
 }
 
 
