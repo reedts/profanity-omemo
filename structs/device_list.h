@@ -27,7 +27,7 @@ struct device_list {
  * @retval 0 Device list successfully serialized
  * @retval -1 An error occurred and `errno` is set to indicate the cause
  */
-int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **head);
+int omemo_device_list_serialize_xml(xmlNodePtr *root, const struct device_list *head);
 
 
 /**

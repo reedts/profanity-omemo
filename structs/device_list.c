@@ -7,7 +7,7 @@
 
 
 
-int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
+int omemo_device_list_serialize_xml(xmlNodePtr *root, const struct device_list *list)
 {
 	struct device_list *cur;
 	xmlNodePtr list_root = NULL;
@@ -23,7 +23,7 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
 
 	xmlAddChild(*root, list_root);
 
-	for (cur = *list; cur != NULL; cur = cur->next) {
+	for (cur = list; cur != NULL; cur = cur->next) {
 		xmlNodePtr device = xmlNewChild(list_root, NULL, BAD_CAST "device", NULL);
 		char id_str[32];
 		snprintf(id_str, sizeof(id_str), "%d", cur->device->address.device_id);
@@ -36,6 +36,7 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, struct device_list **list)
 int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
                                       const char *jid)
 {
+	/* TODO: Implement */
 	return 0;
 }
 
