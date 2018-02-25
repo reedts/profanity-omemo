@@ -52,7 +52,7 @@ int omemo_init_account(const char *barejid)
 
 int omemo_is_stanza(const char *stanza)
 {
-	return omemo_check_stanza_type(stanza) != 0;
+	return strstr(stanza, OMEMO_XML_NS) != NULL;
 }
 
 char *omemo_send_encrypted(const char *msg_stanza)
