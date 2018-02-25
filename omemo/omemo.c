@@ -23,7 +23,7 @@ int omemo_init_account(const char *barejid)
 	signal_protocol_address addr;
 	addr.name_len = strlen(barejid);
 	addr.name = strcpy(malloc(addr.name_len), barejid);
-	addr.device_id = 0;
+	addr.device_id = 0; // TODO
 
 	ctx.omemo_user_contexts[0] = omemo_context_create(&addr);
 
