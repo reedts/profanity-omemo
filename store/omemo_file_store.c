@@ -149,7 +149,7 @@ static int omemo_get_pre_key_store(const signal_protocol_address *local_user,
 	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
 	                         OMEMO_WORKING_DIR);
 
-	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
+	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + sizeof(pre_key_folder_name) + 3,
 	                          "/%s/%s/", local_user->name, pre_key_folder_name);
 
 	if (bytes_written > buf_len) {
@@ -189,7 +189,7 @@ omemo_get_signed_pre_key_store(const signal_protocol_address *local_user,
 	bytes_written = snprintf(buffer, buf_len, "%s/%s", getenv("HOME"),
 	                         OMEMO_WORKING_DIR);
 
-	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
+	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + sizeof(signed_pre_key_folder_name) + 3,
 	                          "/%s/%s/", local_user->name, signed_pre_key_folder_name);
 
 	if (bytes_written > buf_len) {
