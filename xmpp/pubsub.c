@@ -46,7 +46,7 @@ char *omemo_publish_device_list_stanza(const char *jid, const struct device_list
 		errno = EIO;
 		goto err_return;
 	}
-	
+
 	stanza = strndup((char *) xmlBufferContent(buf), stanza_size);
 
 	xmlBufferFree(buf);
