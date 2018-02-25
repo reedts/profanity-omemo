@@ -150,12 +150,7 @@ static int omemo_get_pre_key_store(const signal_protocol_address *local_user,
 	                         OMEMO_WORKING_DIR);
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
-	                          "/%s", local_user->name);
-
-	bytes_written += snprintf(buffer + bytes_written,
-	                          buf_len - bytes_written,
-	                          "/%d/%s/", local_user->device_id,
-	                          pre_key_folder_name);
+	                          "/%s/%s/", local_user->name, pre_key_folder_name);
 
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
@@ -195,12 +190,7 @@ omemo_get_signed_pre_key_store(const signal_protocol_address *local_user,
 	                         OMEMO_WORKING_DIR);
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
-	                          "/%s", local_user->name);
-
-	bytes_written += snprintf(buffer + bytes_written,
-	                          buf_len - bytes_written,
-	                          "/%d/%s/", local_user->device_id,
-	                          signed_pre_key_folder_name);
+	                          "/%s/%s/", local_user->name, signed_pre_key_folder_name);
 
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
@@ -226,9 +216,6 @@ static int omemo_get_identity_key_store(const signal_protocol_address *local_use
 
 	bytes_written += snprintf(buffer + bytes_written, local_user->name_len + 2,
 	                          "/%s", local_user->name);
-
-	bytes_written += snprintf(buffer + bytes_written, buf_len - bytes_written,
-	                          "%d/", local_user->device_id);
 
 	if (bytes_written > buf_len) {
 		errno = ENOBUFS;
@@ -269,9 +256,9 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 	size_t bytes_written;
 	struct stat st = {0};
 
-	bytes_written = snprintf(buffer, buf_len, "%s/%s/%s/%d",
+	bytes_written = snprintf(buffer, buf_len, "%s/%s/%s",
 	                         getenv("HOME"), OMEMO_WORKING_DIR,
-	                         local_user->name, local_user->device_id);
+	                         local_user->name);
 
 	if (!user || !strncmp(local_user->name, user->name,
 	                      local_user->name_len)) {
@@ -282,8 +269,7 @@ static int omemo_get_dir(const signal_protocol_address *local_user,
 			                          "/%s", file);
 		}
 	} else {
-		bytes_written += (!strcmp(file, dev_file_name)
-		                  || !user->device_id)
+		bytes_written += (!strcmp(file, dev_file_name))
 		                 ? snprintf(buffer + bytes_written, buf_len - bytes_written,
 		                            "/%s/%s", "contacts", user->name)
 		                 : snprintf(buffer + bytes_written, buf_len - bytes_written,
