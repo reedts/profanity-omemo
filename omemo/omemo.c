@@ -8,6 +8,7 @@
 #include <omemo/omemo_constants.h>
 #include <structs/omemo_context.h>
 #include <xmpp/omemo_stanza.h>
+#include <gcrypt.h>
 
 struct omemo_context_global ctx;
 
@@ -23,7 +24,12 @@ int omemo_init_account(const char *barejid)
 	signal_protocol_address addr;
 	addr.name_len = strlen(barejid);
 	addr.name = strcpy(malloc(addr.name_len), barejid);
-	addr.device_id = 0; // TODO
+	// XEP dictates device_id must be a random, non-zero, positive 32-bit integer.
+	do {
+		gcry_create_nonce(&addr.device_id, sizeof(addr.device_id));
+	} while (addr.device_id == 0); // Retry if we were extremely unlucky
+	if (addr.device_id < 0) // Flip sign if negative, doesn't have an impact in randomness
+		addr.device_id *= -1;
 
 	ctx.omemo_user_contexts[0] = omemo_context_create(&addr);
 
