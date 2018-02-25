@@ -9,6 +9,7 @@
 #include <structs/omemo_context.h>
 #include <xmpp/omemo_stanza.h>
 #include <gcrypt.h>
+#include <store/omemo_store.h>
 
 struct omemo_context_global ctx;
 
@@ -31,12 +32,20 @@ int omemo_init_account(const char *barejid)
 	if (addr.device_id < 0) // Flip sign if negative, doesn't have an impact in randomness
 		addr.device_id *= -1;
 
-	ctx.omemo_user_contexts[0] = omemo_context_create(&addr);
+	struct omemo_context *userctx = omemo_context_create(&addr);
 
-	char *str = malloc(64);
+	ctx.omemo_user_contexts[0] = userctx; // TODO: Put this in the hash map
+
+	if (!omemo_is_local_user_existent(&userctx->own_address)) {
+		omemo_context_install(userctx);
+	}
+
+	char *str = malloc(31 + 1 + strlen(barejid)); // !! 31 is hardcoded
 	sprintf(str, "Context registered for account %s", barejid);
 	ctx.logger(OMEMO_LOGLVL_INFO, str);
 	free(str);
+
+	// TODO: Announce omemo support
 
 	return 0;
 }
