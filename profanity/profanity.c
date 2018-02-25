@@ -10,7 +10,11 @@
 #include <omemo/omemo.h>
 
 #define CMD_NAME "omemo"
+
+const char *const DEVICELIST_FEATURE_NAME = "eu.siacs.conversations.axolotl.devicelist";
+
 const char *const LOG_PREFIX = "[OMEMO] ";
+
 
 void omemo_logger_profanity(omemo_log_level lvl, const char *message)
 {
@@ -123,23 +127,45 @@ void prof_on_connect(const char *const account_name,
 	char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
 	omemo_init_account(jid_trim(jid));
 	free(jid);
+
+	char *feature = strcpy(malloc(strlen(DEVICELIST_FEATURE_NAME)), DEVICELIST_FEATURE_NAME);
+	prof_disco_add_feature(feature);
+	free(feature); // TODO: Check if profanity frees this for us
 }
 
 char *prof_on_message_stanza_send(const char *const stanza)
 {
+	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Sending stanza");
 	return omemo_send_encrypted(stanza);
 }
 
-int prof_on_message_stanza_receive(const char *const stanza)
+int on_stanza_receive(const char *const stanza)
 {
 	if (omemo_is_stanza(stanza)) {
-		char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
+		omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Stanza received");
+
+		// Process stanza and return message if available
 		char *message = omemo_receive_encrypted(stanza);
-		prof_chat_show(sender, message);
+		if (message != NULL) {
+			// Stanza was a message and could be decrypted
+			char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
+			prof_chat_show(sender, message);
+		}
+
 		// Stanza processed, tell profanity to discard it.
 		return 0;
 	} else {
 		// We're not interested on this, tell profanity to keep scanning it.
 		return 1;
 	}
+}
+
+int prof_on_message_stanza_receive(const char *const stanza)
+{
+	return on_stanza_receive(stanza);
+}
+
+int prof_on_iq_stanza_receive(const char *const stanza)
+{
+	return on_stanza_receive(stanza);
 }
