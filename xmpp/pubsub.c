@@ -10,7 +10,7 @@
 #include <structs/device_list.h>
 #include <xmpp/pubsub.h>
 
-char *omemo_publish_device_list_stanza(const char *jid, const struct device_list *list)
+char *omemo_generate_device_list_stanza(const char *jid, const struct device_list *list)
 {
 	char *stanza;
 	int stanza_size;
