@@ -41,5 +41,8 @@ ext/*
 # VIM workspace
 *.swp
 
+# Compile commands json
+compile_commands.json
+
 # CLion stuff
 .idea
