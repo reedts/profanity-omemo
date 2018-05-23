@@ -55,6 +55,8 @@ int omemo_device_list_deserialize_xml(struct device_list **head, const xmlNodePt
 		if (omemo_device_list_add(head, device) < 0) {
 			return -1;
 		}
+
+		xmlFree(id_str);
 	}
 
 	return 0;
