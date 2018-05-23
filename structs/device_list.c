@@ -9,7 +9,7 @@
 
 int omemo_device_list_serialize_xml(xmlNodePtr *root, const struct device_list *list)
 {
-	struct device_list *cur;
+	const struct device_list *cur;
 	xmlNodePtr list_root = NULL;
 	xmlNsPtr ns_list = NULL;
 
@@ -33,10 +33,30 @@ int omemo_device_list_serialize_xml(xmlNodePtr *root, const struct device_list *
 	return 0;
 }
 
-int omemo_device_list_deserialize_xml(struct device_list **head, xmlNodePtr node,
+int omemo_device_list_deserialize_xml(struct device_list **head, const xmlNodePtr node,
                                       const char *jid)
 {
-	/* TODO: Implement */
+	xmlNodePtr cur;
+
+	if (!head || !node || !jid) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	for (cur = node->children; cur != NULL; cur = cur->next) {
+		xmlChar *id_str = xmlGetProp(cur, BAD_CAST "id");
+		if (!id_str) {
+			errno = EINVAL;
+			return -1;
+		}
+
+		struct omemo_device *device = omemo_device_create(jid, strtol((char *)id_str, NULL, 10));
+
+		if (omemo_device_list_add(head, device) < 0) {
+			return -1;
+		}
+	}
+
 	return 0;
 }
 
