@@ -9,6 +9,8 @@
 #include <string.h>
 #include <structs/device_list.h>
 #include <xmpp/pubsub.h>
+#include <libxml/tree.h>
+#include <libxml/xpath.h>
 
 char *omemo_generate_device_list_stanza(const char *jid, const struct device_list *list)
 {
@@ -51,7 +53,7 @@ char *omemo_generate_device_list_stanza(const char *jid, const struct device_lis
 
 	xmlBufferFree(buf);
 	xmlFreeNodeList(root);
-
+	xmlFreeNs(pubsub_ns);
 	xmlCleanupParser();
 
 	return stanza;
@@ -65,3 +67,67 @@ err_return:
 }
 
 
+struct device_list *omemo_process_device_list_stanza(const char *stanza)
+{
+	xmlDocPtr doc;
+	xmlChar *jid;
+	xmlNodePtr device_list_begin;
+	xmlXPathContextPtr xpath_context;
+	xmlXPathObjectPtr xpath_obj;
+
+	struct device_list *list = NULL;
+
+	if (!stanza) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	doc = xmlParseDoc(BAD_CAST stanza);
+	if (!doc) {
+		return NULL;
+	}
+
+	xpath_context = xmlXPathNewContext(doc);
+	if (!xpath_context) {
+		return NULL;
+	}
+
+	/* Select 'from' attribute of iq */
+	xpath_obj = xmlXPathEvalExpression(BAD_CAST "/iq/@from", xpath_context);
+	if (!xpath_obj) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!xpath_obj->nodesetval) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	jid = (*xpath_obj->nodesetval->nodeTab)->children->content;
+	xmlXPathFreeObject(xpath_obj);
+
+	/* Select 'item' and all children */
+	xpath_obj = xmlXPathEvalExpression(BAD_CAST "/iq/pubsub/publish/item/*", xpath_context);
+	if (!xpath_obj) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!xpath_obj->nodesetval) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	device_list_begin = *xpath_obj->nodesetval->nodeTab;
+
+	if (omemo_device_list_deserialize_xml(&list, device_list_begin, (char *)jid) < 0) {
+		return NULL;
+	}
+
+	xmlXPathFreeObject(xpath_obj);
+	xmlXPathFreeContext(xpath_context);
+	xmlFreeDoc(doc);
+
+	return list;
+}
