@@ -48,6 +48,8 @@ TEST(device_list, deserialize)
 	ASSERT_STREQ(list->device->address.name, "test@test.test");
 	ASSERT_EQ(list->next->device->address.device_id, 1000);
 	ASSERT_STREQ(list->next->device->address.name, "test@test.test");
+
+	omemo_device_list_free(&list);
 }
 
 TEST(device_list, size)
