@@ -50,6 +50,7 @@ TEST(device_list, deserialize)
 	ASSERT_STREQ(list->next->device->address.name, "test@test.test");
 
 	omemo_device_list_free(&list);
+	xmlFreeDoc(doc);
 }
 
 TEST(device_list, size)
