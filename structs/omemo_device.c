@@ -31,7 +31,7 @@ struct omemo_device *omemo_device_create(const char *jid, int32_t id)
 
 void omemo_device_free(struct omemo_device *device)
 {
-	free(device->address.name);
+	free((char *)device->address.name);
 	free(device);
 }
 
