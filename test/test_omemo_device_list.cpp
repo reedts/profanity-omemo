@@ -1,3 +1,4 @@
+#include <libxml/tree.h>
 #include "test_main.h"
 
 TEST(device_list, add)
@@ -17,6 +18,36 @@ TEST(device_list, add)
 	omemo_device_list_free(&list);
 
 	ASSERT_EQ(list, nullptr);
+}
+
+TEST(device_list, deserialize)
+{
+	int retval;
+
+	const std::string xml_input {
+		"<list xmlns=\"urn:xmpp:omemo:0\">"
+		"<device id=\"1000\"/>"
+		"<device id=\"1337\"/>"
+		"</list>"
+	};
+
+	struct device_list *list = NULL;
+	
+	xmlDocPtr doc;
+	xmlNodePtr node;
+
+	doc = xmlParseDoc(BAD_CAST xml_input.c_str());
+
+	node = xmlDocGetRootElement(doc);
+
+	retval = omemo_device_list_deserialize_xml(&list, node, "test@test.test");
+
+	ASSERT_EQ(retval, 0);
+
+	ASSERT_EQ(list->device->address.device_id, 1337);
+	ASSERT_STREQ(list->device->address.name, "test@test.test");
+	ASSERT_EQ(list->next->device->address.device_id, 1000);
+	ASSERT_STREQ(list->next->device->address.name, "test@test.test");
 }
 
 TEST(device_list, size)
