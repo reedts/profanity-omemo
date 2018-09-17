@@ -1,4 +1,6 @@
 #include "test_main.h"
+#include <omemo/omemo.h>
+#include <xmpp/pubsub.h>
 
 TEST(pubsub, generate_device_list_stanza)
 {
@@ -65,4 +67,30 @@ TEST(pubsub, process_device_list_stanza)
 	ASSERT_STREQ(list->next->device->address.name, "test@test.test");
 	
 	omemo_device_list_free(&list);
+}
+
+TEST(pubsub, generate_omemo_stanza)
+{
+	/* It is necessary to completely initialise an omemo account for this */
+	const std::string expected_stanza {
+		"<iq from=\"test@test.test\" type=\"set\" id=\"announce2\">\n"
+		"  <pubsub>\n"
+		"    <publish node=\"eu.siacs.conversations.axolotl.bundles:31415\">\n"
+		"      <item>\n"
+		"        <bundle xmlns=\"eu.siacs.conversations.axolotl\">\n"
+		"        </bundle>\n"
+		"      </item>\n"
+		"    </publish>\n"
+		"  </pubsub>\n"
+		"</iq>"
+	};
+	int retval;
+	const std::string jid {"test@test.test"};
+	
+	/* We need to install an omemo account in order to go on */
+	retval = omemo_init_account(jid.c_str());
+
+	ASSERT_EQ(retval, 0);
+	
+	/* TODO: Implement */
 }
