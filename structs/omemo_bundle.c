@@ -3,9 +3,7 @@
 #endif
 
 #include <errno.h>
-#include <key_helper.h>
 #include <omemo/omemo_constants.h>
-#include <signal_protocol.h>
 #include <stdlib.h>
 #include <store/omemo_store.h>
 #include <string.h>
@@ -85,10 +83,14 @@ struct omemo_bundle *omemo_bundle_create(struct omemo_context *context)
 
 int omemo_bundle_serialize_xml(xmlNodePtr *root, const struct omemo_bundle *bundle)
 {
+	int retval;
 	char cur_pre_key_id_str[32];
 	char *cur_pre_key_str;
+	char *buffer;
 	pre_key_list *pre_key_it;
 	session_pre_key *cur_pre_key;
+	signal_buffer *sig_pre_key_buf;
+	signal_buffer *pub_key_buf;
 	signal_buffer *cur_pre_key_buf;
 	uint32_t cur_pre_key_id;
 	xmlNodePtr bundle_root;
@@ -106,19 +108,38 @@ int omemo_bundle_serialize_xml(xmlNodePtr *root, const struct omemo_bundle *bund
 	bundle_root = xmlNewNode(NULL, BAD_CAST OMEMO_BUNDLE_NODE_NAME);
 	bundle_ns = xmlNewNs(bundle_root, BAD_CAST OMEMO_XML_NS, NULL);
 
-	/* TODO: Use bundle's real signed pre key */
+	retval = ec_public_key_serialize(&sig_pre_key_buf, bundle->signed_pre_key);
+	if (retval) {
+		errno = ENOKEY;
+		return -1;
+	}
+	buffer = strndup((char *)signal_buffer_data(sig_pre_key_buf), signal_buffer_len(sig_pre_key_buf));
 	sig_pre_key_node = xmlNewChild(bundle_root, NULL, BAD_CAST OMEMO_BUNDLE_SIGNED_PRE_KEY_NODE_NAME,
-	                               BAD_CAST "SOMEBASE64ENCODEDSTRING");
-	/* TODO: Use bundle's real signed pre key id */
-	xmlNewProp(sig_pre_key_node, BAD_CAST "signedPreKeyId", BAD_CAST "1");
+	                               BAD_CAST buffer);
 
-	/* TODO: Use bundle's real signed pre key signature */
+	signal_buffer_free(sig_pre_key_buf);
+	free(buffer);
+
+	snprintf(cur_pre_key_id_str, 32, "%u", bundle->signed_pre_key_id);
+	xmlNewProp(sig_pre_key_node, BAD_CAST "signedPreKeyId", BAD_CAST cur_pre_key_id_str);
+
+	buffer = strndup((char *)signal_buffer_data(bundle->signed_pre_key_signature), signal_buffer_len(bundle->signed_pre_key_signature));
 	xmlNewChild(bundle_root, NULL, BAD_CAST OMEMO_BUNDLE_SIGNED_PRE_KEY_SIGNATURE_NODE_NAME,
-	            BAD_CAST "SOMEBASE64ENCODEDSTRING");
+	            BAD_CAST buffer);
 
-	/* TODO: Use bundle's real public identity key */
+	free(buffer);
+
+	retval = ec_public_key_serialize(&pub_key_buf, bundle->pub_key);
+	if (retval) {
+		errno = ENOKEY;
+		return -1;
+	}
+	buffer = strndup((char *)signal_buffer_data(pub_key_buf), signal_buffer_len(pub_key_buf));
 	xmlNewChild(bundle_root, NULL, BAD_CAST OMEMO_BUNDLE_IDENTITY_KEY_NODE_NAME,
-	            BAD_CAST "SOMEBASE64ENCODEDSTRING");
+	            BAD_CAST buffer);
+
+	signal_buffer_free(pub_key_buf);
+	free(buffer);
 
 	/* Add prekey section */
 	pre_key_node = xmlNewChild(bundle_root, NULL, BAD_CAST OMEMO_BUNDLE_PRE_KEYS_NODE_NAME, NULL);

@@ -9,6 +9,7 @@ static const char OMEMO_WORKING_DIR[] = ".local/share/profanity/omemo";
 
 static const char OMEMO_XML_NS[] = "eu.siacs.conversations.axolotl";
 static const char OMEMO_DEVICE_LIST_PUBLISH_XML_NODE[] = "urn:xmpp:omemo:0:devicelist";
+static const char OMEMO_BUNDLE_PUBLISH_XML_NODE[] = "eu.siacs.conversations.axolotl.bundles:31415";
 static const char OMEMO_DEVICE_LIST_XML_NS[] = "urn:xmpp:omemo:0";
 
 static const uint32_t OMEMO_NUM_PRE_KEYS = 100;

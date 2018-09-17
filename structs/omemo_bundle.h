@@ -6,6 +6,8 @@
 #define PROF_OMEMO_BUNDLE_H
 
 #include <libxml/tree.h>
+#include <key_helper.h>
+#include <signal_protocol.h>
 
 #ifdef __cplusplus
 extern "C" {
