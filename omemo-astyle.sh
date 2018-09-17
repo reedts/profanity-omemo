@@ -1,3 +1,3 @@
 #!/bin/bash
 
-astyle -r "*.c" "*.h" --project=astylerc
+astyle -r "*.c" "*.h" --options=astylerc
