@@ -7,6 +7,8 @@
 #include <omemo/omemo.h>
 #include <omemo/omemo_constants.h>
 #include <structs/omemo_context.h>
+#include <structs/omemo_context_def.h>
+#include <structs/omemo_context_global.h>
 #include <xmpp/omemo_stanza.h>
 #include <gcrypt.h>
 #include <store/omemo_store.h>
@@ -15,12 +17,11 @@ struct omemo_context_global ctx;
 
 void omemo_init(void)
 {
-	ctx.omemo_user_contexts = calloc(1, sizeof(struct omemo_context *));
 	ctx.logger(OMEMO_LOGLVL_INFO, "Global context initialized.");
 	// TODO: Initialize stuff
 }
 
-int omemo_init_account(const char *barejid)
+omemo_context *omemo_init_account(const char *barejid)
 {
 	signal_protocol_address addr;
 	addr.name_len = strlen(barejid);
@@ -32,9 +33,7 @@ int omemo_init_account(const char *barejid)
 	if (addr.device_id < 0) // Flip sign if negative, doesn't have an impact in randomness
 		addr.device_id *= -1;
 
-	struct omemo_context *userctx = omemo_context_create(&addr);
-
-	ctx.omemo_user_contexts[0] = userctx; // TODO: Put this in the hash map
+	omemo_context *userctx = omemo_context_create(&addr);
 
 	if (!omemo_is_local_user_existent(&userctx->own_address)) {
 		omemo_context_install(userctx);
@@ -45,9 +44,10 @@ int omemo_init_account(const char *barejid)
 	ctx.logger(OMEMO_LOGLVL_INFO, str);
 	free(str);
 
+
 	// TODO: Announce omemo support
 
-	return 0;
+	return userctx;
 }
 
 int omemo_is_stanza(const char *stanza)
@@ -55,7 +55,7 @@ int omemo_is_stanza(const char *stanza)
 	return strstr(stanza, OMEMO_XML_NS) != NULL;
 }
 
-char *omemo_send_encrypted(const char *msg_stanza)
+char *omemo_send_encrypted(omemo_context *context, const char *msg_stanza)
 {
 	// TODO: Actual encryption
 	ctx.logger(OMEMO_LOGLVL_DEBUG, "Encrypting message");
@@ -65,7 +65,7 @@ char *omemo_send_encrypted(const char *msg_stanza)
 	return NULL;
 }
 
-char *omemo_receive_encrypted(const char *msg_stanza)
+char *omemo_receive_encrypted(omemo_context *context, const char *msg_stanza)
 {
 	if (omemo_check_stanza_type(msg_stanza) != OMEMO_STYPE_NONE) {
 		// This is an OMEMO stanza, process it
@@ -77,10 +77,13 @@ char *omemo_receive_encrypted(const char *msg_stanza)
 	return NULL;
 }
 
-void omemo_shutdown(void)
+void omemo_free_account(omemo_context *context)
 {
-	omemo_context_free(ctx.omemo_user_contexts[0]);
-	free(ctx.omemo_user_contexts);
+	omemo_context_free(context);
+}
+
+void omemo_shutdown()
+{
 }
 
 void omemo_set_logger(omemo_logger logger)

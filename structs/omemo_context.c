@@ -7,6 +7,7 @@
 #include <store/omemo_store.h>
 #include <crypto/crypto_provider.h>
 #include <structs/omemo_context.h>
+#include <structs/omemo_context_def.h>
 
 #define UNUSED(x) (void)(x)
 

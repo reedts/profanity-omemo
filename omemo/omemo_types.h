@@ -12,6 +12,8 @@ typedef enum {
 	OMEMO_LOGLVL_ERROR
 } omemo_log_level;
 
+typedef struct omemo_context omemo_context;
+
 typedef void (* omemo_msg_displayer)(char *receiver, char *msg);
 
 typedef void (* omemo_stanza_sender)(char *stanza);

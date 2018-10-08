@@ -17,6 +17,7 @@
 #include <structs/device_list.h>
 #include <structs/omemo_device.h>
 #include <structs/omemo_context.h>
+#include <structs/omemo_context_def.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>

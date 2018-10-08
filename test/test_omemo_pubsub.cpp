@@ -84,13 +84,13 @@ TEST(pubsub, generate_omemo_stanza)
 		"  </pubsub>\n"
 		"</iq>"
 	};
-	int retval;
+	omemo_context *context;
 	const std::string jid {"test@test.test"};
 	
 	/* We need to install an omemo account in order to go on */
-	retval = omemo_init_account(jid.c_str());
+	context = omemo_init_account(jid.c_str());
 
-	ASSERT_EQ(retval, 0);
+	ASSERT_NE(context, nullptr);
 	
 	/* TODO: Implement */
 }

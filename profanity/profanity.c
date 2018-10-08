@@ -15,6 +15,8 @@ const char *const DEVICELIST_FEATURE_NAME = "eu.siacs.conversations.axolotl.devi
 
 const char *const LOG_PREFIX = "[OMEMO] ";
 
+omemo_context *context;
+
 
 void omemo_logger_profanity(omemo_log_level lvl, const char *message)
 {
@@ -116,7 +118,7 @@ void prof_init(const char *const version,
 	omemo_init();
 	if (fulljid != NULL) {
 		char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
-		omemo_init_account(jid_trim(jid));
+		context = omemo_init_account(jid_trim(jid));
 		free(jid);
 	}
 }
@@ -124,9 +126,12 @@ void prof_init(const char *const version,
 void prof_on_connect(const char *const account_name,
                      const char *const fulljid)
 {
-	char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
-	omemo_init_account(jid_trim(jid));
-	free(jid);
+	/*
+	 * TODO: Necessary?
+	 * char *jid = strcpy(malloc(strlen(fulljid)), fulljid);
+	 * omemo_init_account(jid_trim(jid));
+	 * free(jid);
+	 */
 
 	char *feature = strcpy(malloc(strlen(DEVICELIST_FEATURE_NAME)), DEVICELIST_FEATURE_NAME);
 	prof_disco_add_feature(feature);
@@ -136,7 +141,7 @@ void prof_on_connect(const char *const account_name,
 char *prof_on_message_stanza_send(const char *const stanza)
 {
 	omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Sending stanza");
-	return omemo_send_encrypted(stanza);
+	return omemo_send_encrypted(context, stanza);
 }
 
 int on_stanza_receive(const char *const stanza)
@@ -145,7 +150,7 @@ int on_stanza_receive(const char *const stanza)
 		omemo_logger_profanity(OMEMO_LOGLVL_DEBUG, "Stanza received");
 
 		// Process stanza and return message if available
-		char *message = omemo_receive_encrypted(stanza);
+		char *message = omemo_receive_encrypted(context, stanza);
 		if (message != NULL) {
 			// Stanza was a message and could be decrypted
 			char *sender = strcpy(malloc(64), "nobody@example.org"); // TODO: Get from stanza
