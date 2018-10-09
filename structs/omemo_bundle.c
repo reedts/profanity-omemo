@@ -8,6 +8,7 @@
 #include <store/omemo_store.h>
 #include <string.h>
 #include <structs/omemo_context.h>
+#include <structs/omemo_context_def.h>
 #include <structs/omemo_bundle.h>
 
 #define UNUSED(x) (void)(x)
